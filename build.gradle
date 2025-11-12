@@ -11,29 +11,23 @@ repositories {
 }
 
 dependencies {
-    // Jakarta EE Web API (Servlet, JSP, JAX-RS, etc.)
-    implementation 'jakarta.platform:jakarta.jakartaee-web-api:10.0.0'
+    // Jakarta EE base (servlets, CDI, JAX-RS, etc.)
+    providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 
-    // Eclipse Krazo (implementación de Jakarta MVC)
+    // Jakarta MVC API
+    implementation 'jakarta.mvc:jakarta.mvc-api:2.1.0'
+
+    // Implementación de referencia (Krazo)
     implementation 'org.eclipse.krazo:krazo-core:3.0.1'
-    implementation 'org.eclipse.krazo:krazo-jersey:3.0.1'
+    implementation 'org.eclipse.krazo:krazo-jersey:3.0.1'  // si usas Jersey
+    // Si usas RESTEasy u otra, cambia el artefacto correspondiente
 
-    // Jersey (implementación JAX-RS que usa Krazo)
-    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.1.5'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.1.5'
-
-    // JSTL (etiquetas JSP)
+    // JSTL para JSP
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.1'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 
-    // Driver PostgreSQL
+    // JDBC PostgreSQL
     implementation 'org.postgresql:postgresql:42.7.3'
-
-    // Servlet API para compilación
-    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
-
-    // JUnit (opcional)
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 }
 
 tasks.withType(JavaCompile) {
