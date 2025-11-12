@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: app_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5532:5432" # <- host 5532 -> container 5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      args:
+        APP_PORT: ${APP_PORT}
+    container_name: app_web
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432        # <- importante: puerto interno real
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${APP_PORT}:8080"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
