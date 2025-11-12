@@ -11,17 +11,37 @@ repositories {
 }
 
 dependencies {
-    implementation 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-    implementation 'org.postgresql:postgresql:42.7.3'
+    // Jakarta EE Web API (Servlet, JSP, JAX-RS, etc.)
+    implementation 'jakarta.platform:jakarta.jakartaee-web-api:10.0.0'
+
+    // Eclipse Krazo (implementación de Jakarta MVC)
+    implementation 'org.eclipse.krazo:krazo-core:3.0.1'
+    implementation 'org.eclipse.krazo:krazo-jersey:3.0.1'
+
+    // Jersey (implementación JAX-RS que usa Krazo)
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.1.5'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.1.5'
+
+    // JSTL (etiquetas JSP)
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.1'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+
+    // Driver PostgreSQL
+    implementation 'org.postgresql:postgresql:42.7.3'
+
+    // Servlet API para compilación
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+
+    // JUnit (opcional)
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 }
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = '17'
     targetCompatibility = '17'
+    options.encoding = 'UTF-8'
 }
 
 war {
-    archiveFileName = 'app-base.war'
+    archiveFileName = 'turnos_medicos.war'
 }

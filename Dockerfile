@@ -8,11 +8,18 @@ COPY src ./src
 RUN chmod +x gradlew
 RUN ./gradlew clean war
 
-# Etapa 2: Ejecutar con Tomcat 10
-FROM tomcat:10.1-jdk17
+# Etapa 2: Ejecutar con Payara Full (Jakarta EE 10 compatible)
+FROM payara/server-full:6.2024.4-jdk17
+
+# Argumento y variable de entorno para puerto
 ARG APP_PORT=8087
 ENV APP_PORT=${APP_PORT}
-RUN rm -rf /usr/local/tomcat/webapps/*
-COPY --from=build /app/build/libs/app-base.war /usr/local/tomcat/webapps/ROOT.war
+
+# Copiar WAR compilado al directorio de despliegue de Payara
+COPY --from=build /app/build/libs/*.war $DEPLOY_DIR
+
+# Exponer el puerto definido
 EXPOSE ${APP_PORT}
-CMD ["catalina.sh", "run"]
+
+# Ejecutar Payara
+CMD ["--deploymentDir", "/opt/payara/deployments"]

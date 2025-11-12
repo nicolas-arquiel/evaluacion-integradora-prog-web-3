@@ -4,21 +4,17 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
                              https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
-    <servlet>
-        <servlet-name>home</servlet-name>
-        <servlet-class>com.app.controllers.HomeController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>home</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
-        <servlet>
-        <servlet-name>status</servlet-name>
-        <servlet-class>com.app.controllers.StatusController</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>status</servlet-name>
-        <url-pattern>/status</url-pattern>
-    </servlet-mapping>
 
+    <display-name>Turnos Médicos</display-name>
+
+    <servlet>
+        <servlet-name>jakarta.mvc</servlet-name>
+        <servlet-class>org.eclipse.krazo.core.KrazoServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>jakarta.mvc</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
 </web-app>
