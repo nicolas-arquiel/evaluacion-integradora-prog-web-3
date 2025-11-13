@@ -3,12 +3,16 @@ package com.app.models;
 import java.util.List;
 
 public class Medico {
+
     private int id;
     private String nombreCompleto;
     private String especialidad;
     private String matricula;
     private boolean activo;
+
     private List<Integer> obrasSocialesIds;
+    private List<ObraSocial> obrasSociales;   // NUEVO
+    private String obrasSocialesIdsCsv;       // NUEVO
 
     public Medico() {}
 
@@ -37,4 +41,10 @@ public class Medico {
 
     public List<Integer> getObrasSocialesIds() { return obrasSocialesIds; }
     public void setObrasSocialesIds(List<Integer> obrasSocialesIds) { this.obrasSocialesIds = obrasSocialesIds; }
+
+    public List<ObraSocial> getObrasSociales() { return obrasSociales; }
+    public void setObrasSociales(List<ObraSocial> obrasSociales) { this.obrasSociales = obrasSociales; }
+
+    public String getObrasSocialesIdsCsv() { return obrasSocialesIdsCsv; }
+    public void setObrasSocialesIdsCsv(String obrasSocialesIdsCsv) { this.obrasSocialesIdsCsv = obrasSocialesIdsCsv; }
 }

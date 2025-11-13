@@ -11,22 +11,25 @@ repositories {
 }
 
 dependencies {
-    // Jakarta EE base (servlets, CDI, JAX-RS, etc.)
+    // Jakarta EE API (solo la API, Payara provee las implementaciones)
     providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
 
-    // Jakarta MVC API
+    // Jakarta MVC API (API solamente)
     implementation 'jakarta.mvc:jakarta.mvc-api:2.1.0'
 
-    // Implementación de referencia (Krazo)
+    // Krazo MVC (implementación real)
     implementation 'org.eclipse.krazo:krazo-core:3.0.1'
-    implementation 'org.eclipse.krazo:krazo-jersey:3.0.1'  // si usas Jersey
-    // Si usas RESTEasy u otra, cambia el artefacto correspondiente
+    implementation 'org.eclipse.krazo:krazo-jersey:3.0.1'
 
-    // JSTL para JSP
+    // Jersey (Payara usa Jersey → necesario para que Krazo funcione)
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.1.1'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:3.1.1'
+
+    // JSP + JSTL
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.1'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
 
-    // JDBC PostgreSQL
+    // PostgreSQL JDBC
     implementation 'org.postgresql:postgresql:42.7.3'
 }
 

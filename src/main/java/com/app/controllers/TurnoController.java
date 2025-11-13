@@ -4,17 +4,23 @@ import com.app.models.Turno;
 import com.app.repositories.MedicoRepository;
 import com.app.repositories.PacienteRepository;
 import com.app.repositories.TurnoRepository;
-import com.app.models.Medico;
-import com.app.models.Paciente;
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.mvc.Controller;
+import jakarta.mvc.Models;
 import jakarta.mvc.View;
+
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+
 import java.sql.Date;
-import java.sql.Time;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.time.LocalDate;
 import java.util.*;
 
+@RequestScoped
 @Path("/turnos")
 @Controller
 public class TurnoController {
@@ -23,44 +29,94 @@ public class TurnoController {
     private final MedicoRepository repoMedicos = new MedicoRepository();
     private final PacienteRepository repoPacientes = new PacienteRepository();
 
+    @Inject
+    private Models models;
+
+    // ==================================================
+    // LISTAR + FILTROS
+    // ==================================================
     @GET
-    @View("turnos/listar.jsp")
-    public List<Turno> listar() {
-        return repo.listar();
+    @View("turnos/index.jsp")
+    public void listar(
+            @QueryParam("idMedico") Integer idMedico,
+            @QueryParam("desde") String desde,
+            @QueryParam("hasta") String hasta
+    ) {
+        models.put("medicos", repoMedicos.listar());
+        models.put("pacientes", repoPacientes.listar());
+
+        List<Turno> lista;
+
+        boolean filtraFechas = (desde != null && !desde.isEmpty()) ||
+                               (hasta != null && !hasta.isEmpty());
+
+        if (idMedico != null || filtraFechas) {
+            lista = repo.filtrar(idMedico, desde, hasta);
+        } else {
+            lista = repo.listar();
+        }
+
+        // Cargar obras en cada turno
+        lista.forEach(t -> {
+            List<Integer> obrasIds = repo.obtenerObrasPorPacienteIds(t.getIdPaciente());
+            t.setObrasIds(obrasIds);
+        });
+
+        models.put("turnos", lista);
     }
 
+    // ==================================================
+    // FORM EDITAR
+    // ==================================================
     @GET
-    @Path("/nuevo")
-    @View("turnos/formulario.jsp")
-    public Map<String, Object> nuevo() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("medicos", repoMedicos.listar());
-        data.put("pacientes", repoPacientes.listar());
-        return data;
+    @Path("/editar/{id}")
+    @View("turnos/index.jsp")
+    public void editar(@PathParam("id") int id) {
+
+        Turno t = repo.buscarPorId(id);
+
+        models.put("turno", t);
+        models.put("medicos", repoMedicos.listar());
+        models.put("pacientes", repoPacientes.listar());
     }
 
+    // ==================================================
+    // GUARDAR
+    // ==================================================
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String crear(@FormParam("idMedico") int idMedico,
-                        @FormParam("idPaciente") int idPaciente,
-                        @FormParam("fecha") String fecha,
-                        @FormParam("hora") String hora) {
+    public String guardar(
+            @FormParam("id") Integer id,
+            @FormParam("idPaciente") int idPaciente,
+            @FormParam("idMedico") int idMedico,
+            @FormParam("fecha") String fecha,
+            @FormParam("hora") String hora
+    ) {
         try {
             Turno t = new Turno();
-            t.setIdMedico(idMedico);
             t.setIdPaciente(idPaciente);
+            t.setIdMedico(idMedico);
             t.setFecha(Date.valueOf(fecha));
             t.setHora(Time.valueOf(hora + ":00"));
-            t.setEstado("activo");
+            t.setIdEstado(1);
 
-            repo.insertar(t);
+            if (id == null) {
+                repo.insertar(t);
+            } else {
+                t.setId(id);
+                repo.actualizar(t);
+            }
+
         } catch (SQLException e) {
-            System.err.println("⚠ Error al registrar turno: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return "redirect:/turnos";
     }
 
+    // ==================================================
+    // CANCELAR
+    // ==================================================
     @GET
     @Path("/cancelar/{id}")
     public String cancelar(@PathParam("id") int id) {
@@ -68,65 +124,53 @@ public class TurnoController {
         return "redirect:/turnos";
     }
 
+    // ==================================================
+    // JSON → obras del paciente
+    // ==================================================
     @GET
     @Path("/obras-sociales-paciente/{idPaciente}")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Map<String, Object>> obtenerObrasPaciente(@PathParam("idPaciente") int idPaciente) {
-        String sql = """
-            SELECT o.id, o.nombre
-            FROM pacientes_obras_sociales po
-            JOIN obras_sociales o ON o.id = po.id_obra_social
-            WHERE po.id_paciente = ?
-        """;
-        List<Map<String, Object>> obras = new ArrayList<>();
-        try (Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, idPaciente);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Map<String, Object> item = new HashMap<>();
-                item.put("id", rs.getInt("id"));
-                item.put("nombre", rs.getString("nombre"));
-                obras.add(item);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return obras;
+        return repo.obtenerObrasPorPaciente(idPaciente);
     }
 
+    // ==================================================
+    // JSON → médicos por obra
+    // ==================================================
     @GET
     @Path("/medicos-disponibles")
     @Produces(MediaType.APPLICATION_JSON)
     public List<Map<String, Object>> medicosPorObra(@QueryParam("obras") List<Integer> obras) {
-        if (obras == null || obras.isEmpty()) return List.of();
-        String placeholders = String.join(",", obras.stream().map(x -> "?").toList());
-        String sql = "SELECT DISTINCT m.id, m.nombre_completo, m.especialidad FROM medicos_obras_sociales mo JOIN medicos m ON mo.id_medico = m.id WHERE mo.id_obra_social IN (" + placeholders + ")";
-        List<Map<String, Object>> medicos = new ArrayList<>();
-        try (Connection conn = DatabaseConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)) {
-            for (int i = 0; i < obras.size(); i++) ps.setInt(i + 1, obras.get(i));
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                Map<String, Object> m = new HashMap<>();
-                m.put("id", rs.getInt("id"));
-                m.put("nombre", rs.getString("nombre_completo"));
-                m.put("especialidad", rs.getString("especialidad"));
-                medicos.add(m);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return medicos;
+        return repo.medicosPorObra(obras);
     }
 
+    // ==================================================
+    // CALENDARIO
+    // ==================================================
+    @GET
+    @Path("/calendario")
+    @View("turnos/calendario.jsp")
+    public void calendario() {
 
+        models.put("turnos", repo.obtenerProximosTurnos());
 
+        String[] dias = {"Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"};
+        String[] horas = {"08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00"};
 
+        models.put("dias", dias);
+        models.put("horas", horas);
 
+        Map<String,String> mapHoras = new HashMap<>();
+        for (String h : horas) mapHoras.put(h, h + ":00");
+        models.put("mapHoras", mapHoras);
 
+        Map<String,String> mapFechas = new HashMap<>();
+        LocalDate start = LocalDate.now();
 
+        for (int i = 0; i < dias.length; i++) {
+            mapFechas.put(dias[i], start.plusDays(i).toString());
+        }
 
-
-    
+        models.put("mapFechas", mapFechas);
+    }
 }

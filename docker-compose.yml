@@ -27,8 +27,6 @@ services:
   turnos_medicos_app:
     build:
       context: .
-      args:
-        APP_PORT: 8087
     container_name: turnos_medicos_app
     restart: unless-stopped
     environment:
@@ -38,7 +36,7 @@ services:
       DB_USER: user
       DB_PASSWORD: user123
     ports:
-      - "8087:8080"
+      - "8080:8080"
     depends_on:
       - turnos_medicos_db
 

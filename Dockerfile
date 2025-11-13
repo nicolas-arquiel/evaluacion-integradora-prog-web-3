@@ -1,25 +1,26 @@
 # Etapa 1: Compilar el WAR con Gradle
 FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
+
 COPY gradlew .
 COPY gradle ./gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
+
 RUN chmod +x gradlew
 RUN ./gradlew clean war
 
-# Etapa 2: Ejecutar con Payara Full (Jakarta EE 10 compatible)
+# Etapa 2: Payara Full Server
 FROM payara/server-full:6.2024.4-jdk17
 
-# Argumento y variable de entorno para puerto
-ARG APP_PORT=8087
-ENV APP_PORT=${APP_PORT}
+ENV DEPLOY_DIR=/opt/payara/deployments
 
-# Copiar WAR compilado al directorio de despliegue de Payara
-COPY --from=build /app/build/libs/*.war $DEPLOY_DIR
+# Copiar el WAR al directorio de despliegue
+# (puedes dejar el nombre original o ROOT.war, ahora lo vemos)
+COPY --from=build /app/build/libs/*.war /opt/payara/deployments/ROOT.war
 
-# Exponer el puerto definido
-EXPOSE ${APP_PORT}
+EXPOSE 8080
 
-# Ejecutar Payara
-CMD ["--deploymentDir", "/opt/payara/deployments"]
+# ❌ NO sobreescribas el CMD, usa el de la imagen
+# (opcionalmente, si quisieras, podrías hacer:)
+# CMD ["start-domain", "--verbose"]

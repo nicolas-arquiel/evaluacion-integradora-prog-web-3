@@ -2,6 +2,8 @@ package com.app.models;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Turno {
     private int id;
@@ -9,23 +11,18 @@ public class Turno {
     private int idMedico;
     private Date fecha;
     private Time hora;
-    private String estado;
+
+    private int idEstado;
+    private String estadoNombre;
 
     private String nombrePaciente;
     private String nombreMedico;
 
+    private List<Integer> obrasIds;
+
     public Turno() {}
 
-    public Turno(int id, int idPaciente, int idMedico, Date fecha, Time hora, String estado) {
-        this.id = id;
-        this.idPaciente = idPaciente;
-        this.idMedico = idMedico;
-        this.fecha = fecha;
-        this.hora = hora;
-        this.estado = estado;
-    }
-
-    // Getters y setters
+    // Getters y setters básicos
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -41,12 +38,27 @@ public class Turno {
     public Time getHora() { return hora; }
     public void setHora(Time hora) { this.hora = hora; }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public int getIdEstado() { return idEstado; }
+    public void setIdEstado(int idEstado) { this.idEstado = idEstado; }
+
+    public String getEstadoNombre() { return estadoNombre; }
+    public void setEstadoNombre(String estadoNombre) { this.estadoNombre = estadoNombre; }
 
     public String getNombrePaciente() { return nombrePaciente; }
     public void setNombrePaciente(String nombrePaciente) { this.nombrePaciente = nombrePaciente; }
 
     public String getNombreMedico() { return nombreMedico; }
     public void setNombreMedico(String nombreMedico) { this.nombreMedico = nombreMedico; }
+
+    // Obras del paciente
+    public List<Integer> getObrasIds() { return obrasIds; }
+    public void setObrasIds(List<Integer> obrasIds) { this.obrasIds = obrasIds; }
+
+    // CSV para JSP
+    public String getObrasIdsCsv() {
+        if (obrasIds == null || obrasIds.isEmpty()) return "";
+        return obrasIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+    }
 }

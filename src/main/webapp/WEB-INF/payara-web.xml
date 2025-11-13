@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<payara-web-app xmlns="https://payara.fish/xml/ns/payara-web"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="https://payara.fish/xml/ns/payara-web
+                                    https://payara.fish/xml/ns/payara-web/payara-web-app_6_0.xsd"
+                version="6.0">
+    
+    <context-root>/</context-root>
+</payara-web-app>
