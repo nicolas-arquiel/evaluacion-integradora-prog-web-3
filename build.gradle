@@ -41,4 +41,8 @@ tasks.withType(JavaCompile) {
 
 war {
     archiveFileName = 'turnos_medicos.war'
+    
+    // El plugin war ya copia automáticamente src/main/webapp
+    // Solo necesitamos configurar la estrategia de duplicados
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

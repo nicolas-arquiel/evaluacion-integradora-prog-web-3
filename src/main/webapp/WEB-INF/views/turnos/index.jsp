@@ -3,55 +3,19 @@
 
 <html>
 <head>
-    <title>Turnos</title>
-
-    <style>
-        body { margin:0; display:flex; font-family:Arial; background:#f4f4f4; }
-
-        .sidebar {
-            width:220px; background:#2d3e50; color:white;
-            padding:15px; height:100vh;
-        }
-        .sidebar a {
-            color:white; padding:10px; display:block;
-            text-decoration:none; border-radius:4px;
-        }
-        .sidebar a:hover, .active {
-            background:#f1cc31; color:black !important; font-weight:bold;
-        }
-
-        .content { flex:1; padding:25px; }
-
-        table {
-            width:100%; border-collapse:collapse;
-            background:white; border-radius:6px;
-        }
-        th, td { padding:10px; border-bottom:1px solid #ddd; }
-        th { background:#2d3e50; color:white; }
-
-        tr:hover { background:#f9f9f9; }
-
-        .btn { padding:8px 14px; border:none; border-radius:4px; cursor:pointer; }
-        .btn-primary { background:#2d3e50; color:white; }
-        .btn-danger { background:#d9534f; color:white; }
-
-        dialog { border:none; border-radius:8px; padding:20px; width:420px; }
-        dialog::backdrop { background:rgba(0,0,0,0.4); }
-
-        .filtros { display:flex; gap:15px; margin-bottom:20px; }
-        .filtros input, .filtros select { padding:6px; }
-    </style>
+    <title>Turnos - Salud Total</title>
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
 
 <div class="sidebar">
     <h2>Salud Total</h2>
-    <a href="${pageContext.request.contextPath}/">🏠 Inicio</a>
-    <a href="${pageContext.request.contextPath}/medicos">👨‍⚕️ Médicos</a>
-    <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
-    <a class="active" href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
-    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
+    <a href="/app/">🏠 Inicio</a>
+    <a href="/app/medicos">👨‍⚕️ Médicos</a>
+    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
+    <a href="/app/obras-sociales">🏥 Obras Sociales</a>
+    <a class="active" href="/app/turnos">📅 Turnos</a>
+    <a href="/app/reportes">📊 Reportes</a>
 </div>
 
 <div class="content">
@@ -121,7 +85,7 @@
 <dialog id="modalForm">
     <h3 id="modalTitle"></h3>
 
-    <form method="post" action="${pageContext.request.contextPath}/turnos">
+    <form method="post" action="/app/turnos">
 
         <input type="hidden" name="id" id="form-id">
 
@@ -166,10 +130,6 @@
     </form>
 </dialog>
 
-<!-- ========================================================== -->
-<!-- DATOS EMBEBIDOS EN JAVASCRIPT                               -->
-<!-- ========================================================== -->
-
 <script>
 // DATOS CARGADOS DESDE EL SERVIDOR
 const TODO_MEDICOS = [
@@ -197,44 +157,31 @@ const TODO_PACIENTES = [
 console.log("✅ Médicos cargados:", TODO_MEDICOS.length);
 console.log("✅ Pacientes cargados:", TODO_PACIENTES.length);
 
-// ============================
-// RESET CAMPOS
-// ============================
 function resetCampos() {
     document.getElementById("obra-social-display").value = "";
     document.getElementById("medico").innerHTML = '<option value="">-- Seleccione un paciente primero --</option>';
     document.getElementById("notas").value = "";
 }
 
-// ============================
-// NUEVO TURNO
-// ============================
 function abrirNuevo() {
     document.getElementById("modalTitle").innerText = "Nuevo Turno";
     document.getElementById("form-id").value = "";
     document.getElementById("paciente").value = "";
     document.getElementById("fecha").value = "";
     document.getElementById("hora").value = "";
-
     resetCampos();
     modalForm.showModal();
 }
 
-// ============================
-// CAMBIO DE PACIENTE
-// ============================
 function onPacienteChange() {
     const sel = document.getElementById("paciente");
     const idPaciente = parseInt(sel.value);
-
-    console.log("🟡 Paciente seleccionado:", idPaciente);
 
     if (!idPaciente) {
         resetCampos();
         return;
     }
 
-    // Buscar paciente en los datos cargados
     const paciente = TODO_PACIENTES.find(p => p.id === idPaciente);
 
     if (!paciente) {
@@ -243,28 +190,15 @@ function onPacienteChange() {
         return;
     }
 
-    console.log("📦 Paciente encontrado:", paciente);
-
-    // Mostrar obra social del paciente
     document.getElementById("obra-social-display").value = paciente.obraSocialNombre;
-
-    // Cargar médicos que acepten esa obra social
     cargarMedicos(paciente.obraSocialId);
 }
 
-// ============================
-// CARGAR MÉDICOS FILTRADOS
-// ============================
 function cargarMedicos(obraSocialId) {
-    console.log("🔵 Filtrando médicos por obra social ID:", obraSocialId);
-
     const medicoSelect = document.getElementById("medico");
-    
-    // IMPORTANTE: Limpiar completamente el select
     medicoSelect.innerHTML = "";
 
     if (!obraSocialId) {
-        console.warn("⚠️ Sin obra social");
         const opt = document.createElement("option");
         opt.value = "";
         opt.textContent = "-- Sin obra social --";
@@ -272,12 +206,9 @@ function cargarMedicos(obraSocialId) {
         return;
     }
 
-    // Filtrar médicos que acepten la obra social del paciente
     const medicosFiltrados = TODO_MEDICOS.filter(medico => {
         return medico.obras.includes(parseInt(obraSocialId));
     });
-
-    console.log("📦 Médicos filtrados:", medicosFiltrados);
 
     if (medicosFiltrados.length === 0) {
         const opt = document.createElement("option");
@@ -287,38 +218,26 @@ function cargarMedicos(obraSocialId) {
         return;
     }
 
-    // Agregar opción por defecto
     const optDefault = document.createElement("option");
     optDefault.value = "";
     optDefault.textContent = "-- Seleccione un médico --";
     medicoSelect.appendChild(optDefault);
 
-    // Agregar cada médico filtrado
     medicosFiltrados.forEach(medico => {
         const opt = document.createElement("option");
         opt.value = medico.id;
         opt.textContent = medico.nombre + " (" + medico.especialidad + ")";
         medicoSelect.appendChild(opt);
     });
-
-    console.log("✅ Select de médicos actualizado con", medicosFiltrados.length, "opciones");
 }
 
-// ============================
-// CONFIRMAR CANCELAR
-// ============================
 function confirmarCancelar(id) {
     if (confirm("¿Cancelar turno?")) {
-        window.location.href = "${pageContext.request.contextPath}/turnos/cancelar/" + id;
+        window.location.href = "/app/turnos/cancelar/" + id;
     }
 }
 
-// ============================
-// EDITAR
-// ============================
 function abrirEditar(turno) {
-    console.log("✏ Editando turno:", turno);
-
     document.getElementById("modalTitle").innerText = "Editar Turno";
     document.getElementById("form-id").value = turno.id;
     document.getElementById("paciente").value = turno.pacienteId;
@@ -326,27 +245,17 @@ function abrirEditar(turno) {
     document.getElementById("hora").value = turno.hora;
     document.getElementById("notas").value = turno.notas || "";
 
-    // Cargar obra social del paciente y médicos
     onPacienteChange();
 
-    // Seleccionar el médico correcto después de que se carguen
     setTimeout(() => {
-        const medicoSelect = document.getElementById("medico");
-        medicoSelect.value = turno.medicoId;
-        console.log("✅ Médico seleccionado:", turno.medicoId);
+        document.getElementById("medico").value = turno.medicoId;
     }, 100);
 
     modalForm.showModal();
 }
 
-// ============================
-// EVENTOS INICIALES
-// ============================
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("🟩 DOMContentLoaded");
-
     const btns = document.querySelectorAll(".btn-editar");
-    console.log("🔎 Botones editar encontrados:", btns.length);
 
     btns.forEach(btn => {
         btn.addEventListener("click", () => {

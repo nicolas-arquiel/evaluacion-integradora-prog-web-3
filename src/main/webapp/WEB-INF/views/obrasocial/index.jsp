@@ -3,93 +3,8 @@
 
 <html>
 <head>
-    <title>Obras Sociales</title>
-
-    <style>
-        body {
-            margin:0;
-            display:flex;
-            font-family: Arial;
-            background:#f4f4f4;
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width:220px;
-            background:#2d3e50;
-            color:white;
-            padding:15px;
-            height:100vh;
-        }
-        .sidebar a {
-            color:white;
-            display:block;
-            padding:10px;
-            text-decoration:none;
-            border-radius:4px;
-        }
-        .sidebar a:hover, .active {
-            background:#f1cc31;
-            color:black !important;
-            font-weight:bold;
-        }
-
-        /* CONTENIDO */
-        .content {
-            flex:1;
-            padding:25px;
-        }
-
-        /* TABLA */
-        table {
-            width:100%;
-            border-collapse: collapse;
-            background:white;
-            border-radius:6px;
-        }
-        th, td {
-            padding:10px;
-            border-bottom:1px solid #ddd;
-        }
-        th {
-            background:#2d3e50;
-            color:white;
-        }
-
-        tr:hover {
-            background:#f9f9f9;
-        }
-
-        /* BOTÓN */
-        .btn {
-            padding:8px 14px;
-            border:none;
-            border-radius:4px;
-            cursor:pointer;
-        }
-        .btn-primary {
-            background:#2d3e50;
-            color:white;
-        }
-        .btn-primary:hover {
-            background:#1f2e3d;
-        }
-        .btn-danger {
-            background:#d9534f;
-            color:white;
-        }
-
-        /* MODAL */
-        dialog {
-            border:none;
-            border-radius:8px;
-            padding:20px;
-            width:400px;
-        }
-        dialog::backdrop {
-            background:rgba(0,0,0,0.4);
-        }
-    </style>
+    <title>Obras Sociales - Salud Total</title>
+    <link rel="stylesheet" href="/css/styles.css">
 
     <script>
         // Abre modal para crear
@@ -113,23 +28,22 @@
         // Confirmación antes de eliminar
         function confirmarEliminar(id) {
             if (confirm("¿Seguro que desea eliminar esta obra social?")) {
-                window.location.href = "${pageContext.request.contextPath}/obras-sociales/eliminar/" + id;
+                window.location.href = "/app/obras-sociales/eliminar/" + id;
             }
         }
     </script>
-
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
     <h2>Salud Total</h2>
-    <a href="${pageContext.request.contextPath}/">🏠 Inicio</a>
-    <a href="${pageContext.request.contextPath}/medicos">👨‍⚕️ Médicos</a>
-    <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a class="active" href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
-    <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
-    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
+    <a href="/app/">🏠 Inicio</a>
+    <a href="/app/medicos">👨‍⚕️ Médicos</a>
+    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
+    <a class="active" href="/app/obras-sociales">🏥 Obras Sociales</a>
+    <a href="/app/turnos">📅 Turnos</a>
+    <a href="/app/reportes">📊 Reportes</a>
 </div>
 
 <!-- CONTENIDO -->
@@ -179,7 +93,7 @@
 <dialog id="modalForm">
     <h3 id="modalTitle"></h3>
 
-    <form method="post" action="${pageContext.request.contextPath}/obras-sociales">
+    <form method="post" action="/app/obras-sociales">
           
         <input type="hidden" id="form-action" name="action">
         <input type="hidden" id="form-id" name="id">

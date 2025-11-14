@@ -174,11 +174,11 @@
 ================================= -->
 <div class="sidebar">
     <h2>🏥 Salud Total</h2>
-    <a class="active" href="${pageContext.request.contextPath}/">🏠 Inicio</a>
-    <a href="${pageContext.request.contextPath}/medicos">👨‍⚕️ Médicos</a>
-    <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
-    <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
+    <a class="active" href="${pageContext.request.contextPath}/turnos-medicos">🏠 Inicio</a>
+    <a href="${pageContext.request.contextPath}/turnos-medicos/medicos">👨‍⚕️ Médicos</a>
+    <a href="${pageContext.request.contextPath}/turnos-medicos/pacientes">🧑‍🤝‍🧑 Pacientes</a>
+    <a href="${pageContext.request.contextPath}/turnos-medicos/obras-sociales">🏥 Obras Sociales</a>
+    <a href="${pageContext.request.contextPath}/turnos-medicos/turnos">📅 Turnos</a>
 </div>
 
 <!-- ==============================
@@ -221,7 +221,7 @@
             <c:when test="${empty turnos}">
                 <div class="empty-calendar">
                     <p>No hay turnos programados para esta semana.</p>
-                    <p><a href="${pageContext.request.contextPath}/turnos">Crear nuevo turno</a></p>
+                    <p><a href="${pageContext.request.contextPath}/turnos-medicos/turnos">Crear nuevo turno</a></p>
                 </div>
             </c:when>
             <c:otherwise>

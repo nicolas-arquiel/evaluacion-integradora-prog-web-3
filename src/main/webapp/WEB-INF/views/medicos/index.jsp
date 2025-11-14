@@ -3,94 +3,60 @@
 
 <html>
 <head>
-<title>Médicos</title>
+    <title>Médicos - Salud Total</title>
+    <link rel="stylesheet" href="/css/styles.css">
 
-<style>
-    body { margin:0; display:flex; font-family:Arial; background:#f4f4f4; }
+    <script>
+    function abrirNuevo() {
+        document.getElementById("modalTitle").innerText = "Nuevo Médico";
+        document.getElementById("form-action").value = "crear";
+        document.getElementById("form-id").value = "";
 
-    .sidebar {
-        width:220px; background:#2d3e50; color:white;
-        padding:15px; height:100vh;
+        document.getElementById("form-nombre").value = "";
+        document.getElementById("form-especialidad").value = "";
+        document.getElementById("form-matricula").value = "";
+
+        document.querySelectorAll(".chk-obra").forEach(chk => chk.checked = false);
+
+        modalForm.showModal();
     }
-    .sidebar a {
-        color:white; padding:10px; display:block;
-        text-decoration:none; border-radius:4px;
+
+    function abrirEditar(id, nombre, especialidadId, matricula, obrasCsv) {
+        document.getElementById("modalTitle").innerText = "Editar Médico";
+        document.getElementById("form-action").value = "actualizar";
+        document.getElementById("form-id").value = id;
+
+        document.getElementById("form-nombre").value = nombre;
+        document.getElementById("form-especialidad").value = especialidadId;
+        document.getElementById("form-matricula").value = matricula;
+
+        const obras = obrasCsv.split(",").map(x => x.trim());
+
+        document.querySelectorAll(".chk-obra").forEach(chk => {
+            chk.checked = obras.includes(chk.value);
+        });
+
+        modalForm.showModal();
     }
-    .sidebar a:hover, .active {
-        background:#f1cc31; color:black !important; font-weight:bold;
+
+    function confirmarEliminar(id) {
+        if (confirm("¿Eliminar este médico?")) {
+            window.location.href = "/app/medicos/eliminar/" + id;
+        }
     }
-
-    .content { flex:1; padding:25px; }
-
-    table {
-        width:100%; border-collapse:collapse;
-        background:white; border-radius:6px;
-    }
-    th, td { padding:10px; border-bottom:1px solid #ddd; }
-    th { background:#2d3e50; color:white; }
-
-    tr:hover { background:#f9f9f9; }
-
-    .btn { padding:8px 14px; border:none; border-radius:4px; cursor:pointer; }
-    .btn-primary { background:#2d3e50; color:white; }
-    .btn-danger { background:#d9534f; color:white; }
-
-    dialog { border:none; border-radius:8px; padding:20px; width:420px; }
-    dialog::backdrop { background:rgba(0,0,0,0.4); }
-</style>
-
-<script>
-function abrirNuevo() {
-    document.getElementById("modalTitle").innerText = "Nuevo Médico";
-    document.getElementById("form-action").value = "crear";
-    document.getElementById("form-id").value = "";
-
-    document.getElementById("form-nombre").value = "";
-    document.getElementById("form-especialidad").value = "";
-    document.getElementById("form-matricula").value = "";
-
-    document.querySelectorAll(".chk-obra").forEach(chk => chk.checked = false);
-
-    modalForm.showModal();
-}
-
-function abrirEditar(id, nombre, especialidadId, matricula, obrasCsv) {
-    document.getElementById("modalTitle").innerText = "Editar Médico";
-    document.getElementById("form-action").value = "actualizar";
-    document.getElementById("form-id").value = id;
-
-    document.getElementById("form-nombre").value = nombre;
-    document.getElementById("form-especialidad").value = especialidadId;
-    document.getElementById("form-matricula").value = matricula;
-
-    const obras = obrasCsv.split(",").map(x => x.trim());
-
-    document.querySelectorAll(".chk-obra").forEach(chk => {
-        chk.checked = obras.includes(chk.value);
-    });
-
-    modalForm.showModal();
-}
-
-function confirmarEliminar(id) {
-    if (confirm("¿Eliminar este médico?")) {
-        window.location.href = "${pageContext.request.contextPath}/medicos/eliminar/" + id;
-    }
-}
-</script>
-
+    </script>
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <div class="sidebar">
     <h2>Salud Total</h2>
-    <a href="${pageContext.request.contextPath}/">🏠 Inicio</a>
-    <a class="active" href="${pageContext.request.contextPath}/medicos">👨‍⚕️ Médicos</a>
-    <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
-    <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
-    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
+    <a href="/app/">🏠 Inicio</a>
+    <a class="active" href="/app/medicos">👨‍⚕️ Médicos</a>
+    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
+    <a href="/app/obras-sociales">🏥 Obras Sociales</a>
+    <a href="/app/turnos">📅 Turnos</a>
+    <a href="/app/reportes">📊 Reportes</a>
 </div>
 
 <!-- CONTENIDO -->
@@ -144,7 +110,7 @@ function confirmarEliminar(id) {
 <dialog id="modalForm">
     <h3 id="modalTitle"></h3>
 
-    <form method="post" action="${pageContext.request.contextPath}/medicos">
+    <form method="post" action="/app/medicos">
 
         <input type="hidden" name="action" id="form-action">
         <input type="hidden" name="id" id="form-id">

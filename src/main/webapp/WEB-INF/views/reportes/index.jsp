@@ -4,57 +4,10 @@
 <html>
 <head>
     <title>Reportes y Estadísticas - Salud Total</title>
+    <link rel="stylesheet" href="/css/styles.css">
 
     <style>
-        body {
-            margin: 0;
-            display: flex;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-        }
-
-        /* === SIDEBAR === */
-        .sidebar {
-            width: 220px;
-            background: #2d3e50;
-            color: white;
-            padding: 15px;
-            min-height: 100vh;
-        }
-
-        .sidebar h2 {
-            margin-top: 0;
-            font-size: 22px;
-        }
-
-        .sidebar a {
-            color: white;
-            padding: 10px;
-            display: block;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-bottom: 5px;
-        }
-
-        .sidebar a:hover,
-        .sidebar .active {
-            background: #f1cc31;
-            color: black !important;
-            font-weight: bold;
-        }
-
-        /* === CONTENIDO === */
-        .content {
-            flex: 1;
-            padding: 25px;
-        }
-
-        h1 {
-            margin-top: 0;
-            color: #2d3e50;
-        }
-
-        /* === CARDS DE REPORTES === */
+        /* === ESTILOS ESPECÍFICOS DE REPORTES === */
         .report-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -100,7 +53,6 @@
             font-size: 14px;
         }
 
-        /* === SECCIÓN DE REPORTE === */
         .report-section {
             background: white;
             padding: 25px;
@@ -126,35 +78,6 @@
             padding-bottom: 10px;
         }
 
-        /* === TABLAS === */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background: #2d3e50;
-            color: white;
-            font-weight: bold;
-        }
-
-        tr:hover {
-            background: #f9f9f9;
-        }
-
-        .total-row {
-            background: #e3f2fd;
-            font-weight: bold;
-        }
-
-        /* === ESTADÍSTICAS === */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -181,37 +104,22 @@
             font-weight: bold;
             color: #2d3e50;
         }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state .icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
 
-<!-- ==============================
-     SIDEBAR
-================================= -->
+<!-- SIDEBAR -->
 <div class="sidebar">
     <h2>🏥 Salud Total</h2>
-    <a href="${pageContext.request.contextPath}/">🏠 Inicio</a>
-    <a href="${pageContext.request.contextPath}/medicos">👨‍⚕️ Médicos</a>
-    <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
-    <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
-    <a class="active" href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
+    <a href="/app/">🏠 Inicio</a>
+    <a href="/app/medicos">👨‍⚕️ Médicos</a>
+    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
+    <a href="/app/obras-sociales">🏥 Obras Sociales</a>
+    <a href="/app/turnos">📅 Turnos</a>
+    <a class="active" href="/app/reportes">📊 Reportes</a>
 </div>
 
-<!-- ==============================
-     CONTENIDO PRINCIPAL
-================================= -->
+<!-- CONTENIDO PRINCIPAL -->
 <div class="content">
 
     <h1>📊 Reportes y Estadísticas</h1>
@@ -461,20 +369,15 @@
 let reporteActual = null;
 
 function mostrarReporte(tipoReporte) {
-    // Remover selección de todas las cards
     document.querySelectorAll('.report-card').forEach(card => {
         card.classList.remove('selected');
     });
 
-    // Ocultar todos los reportes
     document.querySelectorAll('.report-section').forEach(section => {
         section.classList.remove('active');
     });
 
-    // Seleccionar la card clickeada
     document.getElementById('card-' + tipoReporte).classList.add('selected');
-
-    // Mostrar el reporte correspondiente
     document.getElementById('report-' + tipoReporte).classList.add('active');
 
     reporteActual = tipoReporte;

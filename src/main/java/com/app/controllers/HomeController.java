@@ -16,10 +16,9 @@ import jakarta.ws.rs.Path;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.*;
-import java.sql.Date;
 
 @RequestScoped
-@Path("/")
+@Path("")  // ← Ruta vacía para que /app/ sea el index
 @Controller
 public class HomeController {
 
@@ -31,6 +30,7 @@ public class HomeController {
     private Models models;
 
     @GET
+    @Path("")  // ← Ruta vacía = /app/
     @View("index.jsp")
     public void index() {
         
@@ -42,7 +42,7 @@ public class HomeController {
         LocalDate hoy = LocalDate.now();
         List<Turno> todosLosTurnos = repoTurnos.listar();
         long turnosHoy = todosLosTurnos.stream()
-            .filter(t -> t.getFecha().toLocalDate().equals(hoy))
+            .filter(t -> t.getFecha() != null && t.getFecha().toLocalDate().equals(hoy))
             .count();
         models.put("turnosHoy", turnosHoy);
         
@@ -50,16 +50,26 @@ public class HomeController {
         LocalDate limite = hoy.plusDays(7);
         long proximosTurnos = todosLosTurnos.stream()
             .filter(t -> {
+                if (t.getFecha() == null) return false;
                 LocalDate fechaTurno = t.getFecha().toLocalDate();
                 return !fechaTurno.isBefore(hoy) && !fechaTurno.isAfter(limite);
             })
             .count();
         models.put("proximosTurnos", proximosTurnos);
         
-        // Calendario semanal
-        generarCalendarioSemanal();
+        // Obtener turnos de la próxima semana para mostrar en el index
+        List<Turno> turnosSemana = repoTurnos.filtrar(
+            null, 
+            hoy.toString(), 
+            hoy.plusDays(6).toString()
+        );
+        models.put("turnos", turnosSemana);
+        
+        // Si quieres el calendario completo, descomenta esto:
+        // generarCalendarioSemanal();
     }
 
+    // Método opcional para calendario (si lo quieres en el index)
     private void generarCalendarioSemanal() {
         LocalDate hoy = LocalDate.now();
         
@@ -92,13 +102,5 @@ public class HomeController {
             mapHoras.put(h, h + ":00");
         }
         models.put("mapHoras", mapHoras);
-        
-        // Obtener turnos de la semana
-        List<Turno> turnosSemana = repoTurnos.filtrar(
-            null, 
-            hoy.toString(), 
-            hoy.plusDays(6).toString()
-        );
-        models.put("turnos", turnosSemana);
     }
 }
