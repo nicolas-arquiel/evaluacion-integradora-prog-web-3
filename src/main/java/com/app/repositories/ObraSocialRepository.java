@@ -97,4 +97,55 @@ public class ObraSocialRepository {
             e.printStackTrace();
         }
     }
+
+    // ======================================================
+    // MÉTODOS DE VALIDACIÓN
+    // ======================================================
+
+    /**
+     * Verifica si ya existe una obra social con el nombre dado (case-insensitive)
+     */
+    public boolean existePorNombre(String nombre) {
+        String sql = "SELECT COUNT(*) FROM obras_sociales WHERE UPPER(TRIM(nombre)) = UPPER(TRIM(?)) AND activo = TRUE";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica si ya existe otra obra social con el mismo nombre excluyendo un ID específico
+     */
+    public boolean existePorNombreExcluyendoId(String nombre, int idExcluir) {
+        String sql = "SELECT COUNT(*) FROM obras_sociales WHERE UPPER(TRIM(nombre)) = UPPER(TRIM(?)) AND id != ? AND activo = TRUE";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, nombre);
+            ps.setInt(2, idExcluir);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

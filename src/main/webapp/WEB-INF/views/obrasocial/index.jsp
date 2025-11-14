@@ -4,53 +4,20 @@
 <html>
 <head>
     <title>Obras Sociales - Salud Total</title>
-    <link rel="stylesheet" href="/css/styles.css">
-
-    <script>
-        // Abre modal para crear
-        function abrirNuevo() {
-            document.getElementById("form-id").value = "";
-            document.getElementById("form-nombre").value = "";
-            document.getElementById("modalTitle").innerText = "Nueva Obra Social";
-            document.getElementById("form-action").value = "crear";
-            document.getElementById("modalForm").showModal();
-        }
-
-        // Abre modal para editar con datos
-        function abrirEditar(id, nombre) {
-            document.getElementById("form-id").value = id;
-            document.getElementById("form-nombre").value = nombre;
-            document.getElementById("modalTitle").innerText = "Editar Obra Social";
-            document.getElementById("form-action").value = "actualizar";
-            document.getElementById("modalForm").showModal();
-        }
-
-        // Confirmación antes de eliminar
-        function confirmarEliminar(id) {
-            if (confirm("¿Seguro que desea eliminar esta obra social?")) {
-                window.location.href = "/app/obras-sociales/eliminar/" + id;
-            }
-        }
-    </script>
+    <jsp:include page="/WEB-INF/includes/header.jsp" />
+    <script src="/js/obrasocial.js"></script>
 </head>
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-    <h2>Salud Total</h2>
-    <a href="/app/">🏠 Inicio</a>
-    <a href="/app/medicos">👨‍⚕️ Médicos</a>
-    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a class="active" href="/app/obras-sociales">🏥 Obras Sociales</a>
-    <a href="/app/turnos">📅 Turnos</a>
-    <a href="/app/reportes">📊 Reportes</a>
-</div>
+<jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
 <!-- CONTENIDO -->
 <div class="content">
-
-    <h2>Obras Sociales</h2>
-    <button class="btn btn-primary" onclick="abrirNuevo()">➕ Nueva Obra Social</button>
+    <h2><i class="fas fa-hospital"></i> Obras Sociales</h2>
+    <button class="btn btn-primary" onclick="abrirNuevo()">
+        <i class="fas fa-plus"></i> Nueva Obra Social
+    </button>
 
     <br><br>
 
@@ -69,23 +36,30 @@
                 <td>
                     <c:choose>
                         <c:when test="${o.activo}">
-                            <span style="color: green;">✓ Activo</span>
+                            <span style="color: green; font-weight: bold;">
+                                <i class="fas fa-check-circle"></i> Activo
+                            </span>
                         </c:when>
                         <c:otherwise>
-                            <span style="color: red;">✗ Inactivo</span>
+                            <span style="color: red; font-weight: bold;">
+                                <i class="fas fa-times-circle"></i> Inactivo
+                            </span>
                         </c:otherwise>
                     </c:choose>
                 </td>
                 <td>
                     <button class="btn btn-primary"
-                            onclick="abrirEditar('${o.id}','${o.nombre}')">✏ Editar</button>
+                            onclick="abrirEditar('${o.id}','${o.nombre}')">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
 
                     <button class="btn btn-danger"
-                            onclick="confirmarEliminar('${o.id}')">🗑 Eliminar</button>
+                            onclick="eliminarObraSocial('${o.id}')">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
                 </td>
             </tr>
         </c:forEach>
-
     </table>
 </div>
 
@@ -94,17 +68,24 @@
     <h3 id="modalTitle"></h3>
 
     <form method="post" action="/app/obras-sociales">
-          
         <input type="hidden" id="form-action" name="action">
         <input type="hidden" id="form-id" name="id">
 
-        <label>Nombre:</label><br>
-        <input type="text" id="form-nombre" name="nombre" required style="width:100%; padding:8px;"><br><br>
+        <label><i class="fas fa-hospital"></i> Nombre:</label>
+        <input type="text" id="form-nombre" name="nombre" required>
 
-        <button class="btn btn-primary" type="submit">Guardar</button>
-        <button type="button" class="btn" onclick="modalForm.close()">Cancelar</button>
+        <br>
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+        <button type="button" class="btn" onclick="modalForm.close()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
     </form>
 </dialog>
+
+<!-- Incluir sistema de alertas -->
+<jsp:include page="/WEB-INF/includes/alerts.jsp" />
 
 </body>
 </html>

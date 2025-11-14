@@ -1,0 +1,53 @@
+/* === TARJETAS DE TURNOS === */
+.turnos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.turno-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.turno-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
+.turno-card h3 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+}
+
+.turno-card small {
+    color: #555;
+}
+
+/* === BADGES DE ESTADO === */
+.estado {
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.estado-programado {
+    background: #2e8bff;
+    color: white;
+}
+
+.estado-completado {
+    background: #4caf50;
+    color: white;
+}
+
+.estado-cancelado {
+    background: #d32f2f;
+    color: white;
+}

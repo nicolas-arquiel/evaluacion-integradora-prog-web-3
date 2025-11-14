@@ -4,57 +4,20 @@
 <html>
 <head>
     <title>Pacientes - Salud Total</title>
-    <link rel="stylesheet" href="/css/styles.css">
-
-    <script>
-    function abrirNuevo() {
-        document.getElementById("modalTitle").innerText = "Nuevo Paciente";
-        document.getElementById("form-action").value = "crear";
-        document.getElementById("form-id").value = "";
-        document.getElementById("form-nombre").value = "";
-        document.getElementById("form-email").value = "";
-        document.getElementById("form-telefono").value = "";
-        document.getElementById("form-documento").value = "";
-        document.getElementById("form-obra-social").value = "";
-        modalForm.showModal();
-    }
-
-    function abrirEditar(id, nombre, email, telefono, documento, obraSocialId) {
-        document.getElementById("modalTitle").innerText = "Editar Paciente";
-        document.getElementById("form-action").value = "actualizar";
-        document.getElementById("form-id").value = id;
-        document.getElementById("form-nombre").value = nombre;
-        document.getElementById("form-email").value = email;
-        document.getElementById("form-telefono").value = telefono;
-        document.getElementById("form-documento").value = documento;
-        document.getElementById("form-obra-social").value = obraSocialId;
-        modalForm.showModal();
-    }
-
-    function confirmarEliminar(id) {
-        if (confirm("¿Eliminar este paciente?")) {
-            window.location.href = "${pageContext.request.contextPath}/app/pacientes/eliminar/" + id;
-        }
-    }
-    </script>
+    <jsp:include page="/WEB-INF/includes/header.jsp" />
+    <script src="/js/pacientes.js"></script>
 </head>
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-    <h2>Salud Total</h2>
-    <a href="${pageContext.request.contextPath}/app">🏠 Inicio</a>
-    <a href="${pageContext.request.contextPath}/app/medicos">👨‍⚕️ Médicos</a>
-    <a class="active" href="${pageContext.request.contextPath}/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="${pageContext.request.contextPath}/app/obras-sociales">🏥 Obras Sociales</a>
-    <a href="${pageContext.request.contextPath}/app/turnos">📅 Turnos</a>
-    <a href="${pageContext.request.contextPath}/app/reportes">📊 Reportes</a>
-</div>
+<jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
 <!-- CONTENIDO -->
 <div class="content">
-    <h2>Pacientes</h2>
-    <button class="btn btn-primary" onclick="abrirNuevo()">➕ Nuevo Paciente</button>
+    <h2><i class="fas fa-users"></i> Pacientes</h2>
+    <button class="btn btn-primary" onclick="abrirNuevo()">
+        <i class="fas fa-plus"></i> Nuevo Paciente
+    </button>
 
     <br><br>
 
@@ -80,10 +43,10 @@
                 <td>
                     <button class="btn btn-primary"
                             onclick="abrirEditar('${p.id}','${p.nombre}','${p.email}','${p.numeroTelefono}','${p.documento}','${p.obraSocialId}')">
-                        ✏ Editar
+                        <i class="fas fa-edit"></i> Editar
                     </button>
-                    <button class="btn btn-danger" onclick="confirmarEliminar('${p.id}')">
-                        🗑 Eliminar
+                    <button class="btn btn-danger" onclick="eliminarPaciente('${p.id}')">
+                        <i class="fas fa-trash"></i> Eliminar
                     </button>
                 </td>
             </tr>
@@ -98,19 +61,19 @@
         <input type="hidden" name="action" id="form-action">
         <input type="hidden" name="id" id="form-id">
 
-        <label>Nombre:</label>
+        <label><i class="fas fa-user"></i> Nombre:</label>
         <input type="text" id="form-nombre" name="nombre" required>
 
-        <label>Email:</label>
+        <label><i class="fas fa-envelope"></i> Email:</label>
         <input type="email" id="form-email" name="email">
 
-        <label>Teléfono:</label>
+        <label><i class="fas fa-phone"></i> Teléfono:</label>
         <input type="text" id="form-telefono" name="numeroTelefono">
 
-        <label>Documento:</label>
+        <label><i class="fas fa-id-card"></i> Documento:</label>
         <input type="text" id="form-documento" name="documento" required>
 
-        <label>Obra Social:</label>
+        <label><i class="fas fa-hospital"></i> Obra Social:</label>
         <select id="form-obra-social" name="obraSocialId" required>
             <option value="">-- Seleccione --</option>
             <c:forEach var="o" items="${obrasSociales}">
@@ -119,10 +82,17 @@
         </select>
 
         <br>
-        <button class="btn btn-primary" type="submit">Guardar</button>
-        <button type="button" class="btn" onclick="modalForm.close()">Cancelar</button>
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+        <button type="button" class="btn" onclick="modalForm.close()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
     </form>
 </dialog>
+
+<!-- Incluir sistema de alertas -->
+<jsp:include page="/WEB-INF/includes/alerts.jsp" />
 
 </body>
 </html>

@@ -15,6 +15,7 @@ public class PacienteRepository {
             SELECT p.*, os.nombre as obra_social_nombre
             FROM pacientes p
             INNER JOIN obras_sociales os ON p.obra_social_id = os.id
+            WHERE p.activo = TRUE
             ORDER BY p.id
         """;
 
@@ -44,7 +45,52 @@ public class PacienteRepository {
         return pacientes;
     }
 
+    public boolean existeDocumento(String documento) {
+        String sql = "SELECT COUNT(*) FROM pacientes WHERE documento = ? AND activo = TRUE";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, documento);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+
+    public boolean existeDocumentoParaOtro(String documento, int idPaciente) {
+        String sql = "SELECT COUNT(*) FROM pacientes WHERE documento = ? AND id != ? AND activo = TRUE";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, documento);
+            ps.setInt(2, idPaciente);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+
     public void insertar(Paciente p) throws SQLException {
+        if (existeDocumento(p.getDocumento())) {
+            throw new SQLException("Ya existe un paciente con el documento: " + p.getDocumento());
+        }
+
         String sql = """
             INSERT INTO pacientes (nombre, email, numero_telefono, documento, obra_social_id, activo) 
             VALUES (?, ?, ?, ?, ?, ?)
@@ -103,6 +149,10 @@ public class PacienteRepository {
     }
 
     public void actualizar(Paciente p) throws SQLException {
+        if (existeDocumentoParaOtro(p.getDocumento(), p.getId())) {
+            throw new SQLException("Ya existe otro paciente con el documento: " + p.getDocumento());
+        }
+
         String sql = """
             UPDATE pacientes 
             SET nombre=?, email=?, numero_telefono=?, documento=?, obra_social_id=?, activo=? 

@@ -5,6 +5,7 @@
 <head>
     <title>Sistema de Turnos Médicos - Salud Total</title>
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/home.css">
 
     <style>
         /* === ESTILOS ESPECÍFICOS DEL INDEX === */

@@ -1,0 +1,119 @@
+/* ========================================
+   ESTILOS ESPECÍFICOS PARA MÉDICOS
+======================================== */
+
+/* Modal más ancho para médicos */
+#modalForm {
+    width: 550px !important;
+    max-width: 95vw !important;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Contenedor para obras sociales */
+.obras-sociales-container {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background: #f9f9f9;
+    margin-bottom: 15px;
+}
+
+/* Estilos para checkboxes de obras sociales */
+.obra-social-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 5px;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.obra-social-item:hover {
+    background-color: #e9ecef;
+}
+
+.obra-social-item input[type="checkbox"] {
+    margin-right: 10px;
+    margin-bottom: 0 !important;
+    width: auto !important;
+    flex-shrink: 0;
+}
+
+.obra-social-item label {
+    margin-bottom: 0 !important;
+    font-weight: normal !important;
+    cursor: pointer;
+    flex: 1;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+/* Botones del modal */
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+    #modalForm {
+        width: 95vw !important;
+        height: 90vh;
+        padding: 15px;
+    }
+    
+    .obras-sociales-container {
+        max-height: 150px;
+    }
+    
+    .modal-buttons {
+        flex-direction: column;
+    }
+    
+    .modal-buttons .btn {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+}
+
+/* Scrollbar personalizado para obras sociales */
+.obras-sociales-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.obras-sociales-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.obras-sociales-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.obras-sociales-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Estilo para labels con iconos */
+.input-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.input-label i {
+    color: #2d3e50;
+    width: 16px;
+    text-align: center;
+}

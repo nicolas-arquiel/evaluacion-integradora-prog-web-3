@@ -3,26 +3,33 @@
 
 <html>
 <head>
-    <title>Turnos - Salud Total</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Gestión de Turnos - Salud Total</title>
+    <jsp:include page="/WEB-INF/includes/header.jsp" />
+    <script src="/js/turnos.js"></script>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>Salud Total</h2>
-    <a href="/app/">🏠 Inicio</a>
-    <a href="/app/medicos">👨‍⚕️ Médicos</a>
-    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="/app/obras-sociales">🏥 Obras Sociales</a>
-    <a class="active" href="/app/turnos">📅 Turnos</a>
-    <a href="/app/reportes">📊 Reportes</a>
-</div>
+<!-- SIDEBAR -->
+<jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
-<div class="content">
+<!-- CONTENIDO -->
+<div class="content" 
+     data-medicos='[<c:forEach var="m" items="${medicos}" varStatus="status">{"id":${m.id},"nombre":"${m.nombre}","especialidad":"${m.especialidadDescripcion}","obras":[${m.obrasSocialesIdsCsv}]}<c:if test="${!status.last}">,</c:if></c:forEach>]'
+     data-pacientes='[<c:forEach var="p" items="${pacientes}" varStatus="status">{"id":${p.id},"nombre":"${p.nombre}","obraSocialId":${p.obraSocialId},"obraSocialNombre":"${p.obraSocialNombre}"}<c:if test="${!status.last}">,</c:if></c:forEach>]'>
 
-    <h2>Turnos</h2>
+    <h2><i class="fas fa-calendar-alt"></i> Gestión de Turnos</h2>
 
-    <button class="btn btn-primary" onclick="abrirNuevo()">➕ Nuevo Turno</button>
+    <div style="background: #e8f4fd; padding: 12px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #007bff;">
+        <p style="margin: 0; color: #055160;">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Horarios de atención:</strong> Lunes a Viernes de 8:00 a 17:45 hs (último turno). 
+            La clínica no atiende fines de semana.
+        </p>
+    </div>
+
+    <button class="btn btn-primary" onclick="abrirNuevo()">
+        <i class="fas fa-plus"></i> Agendar Nuevo Turno
+    </button>
 
     <br><br>
 
@@ -31,14 +38,16 @@
         <select name="idMedico">
             <option value="">-- Todos los médicos --</option>
             <c:forEach var="m" items="${medicos}">
-                <option value="${m.id}">${m.nombre} (${m.especialidadDescripcion})</option>
+                <option value="${m.id}">Dr. ${m.nombre} (${m.especialidadDescripcion})</option>
             </c:forEach>
         </select>
 
         <input type="date" name="desde" placeholder="Desde">
         <input type="date" name="hasta" placeholder="Hasta">
 
-        <button class="btn btn-primary" type="submit">Filtrar</button>
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-filter"></i> Filtrar Agenda
+        </button>
     </form>
 
     <!-- LISTADO -->
@@ -57,10 +66,28 @@
             <tr>
                 <td>${t.id}</td>
                 <td>${t.nombrePaciente}</td>
-                <td>${t.nombreMedico}</td>
+                <td>Dr. ${t.nombreMedico}</td>
                 <td>${t.fecha}</td>
                 <td>${t.hora}</td>
-                <td>${t.estadoNombre}</td>
+                <td>
+                    <c:choose>
+                        <c:when test="${t.estadoNombre == 'Programado'}">
+                            <span style="color: green; font-weight: bold;">
+                                <i class="fas fa-clock"></i> ${t.estadoNombre}
+                            </span>
+                        </c:when>
+                        <c:when test="${t.estadoNombre == 'Cancelado'}">
+                            <span style="color: red; font-weight: bold;">
+                                <i class="fas fa-times-circle"></i> ${t.estadoNombre}
+                            </span>
+                        </c:when>
+                        <c:otherwise>
+                            <span style="color: orange; font-weight: bold;">
+                                <i class="fas fa-question-circle"></i> ${t.estadoNombre}
+                            </span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
                 <td>
                     <button class="btn btn-primary btn-editar"
                             data-id="${t.id}"
@@ -70,11 +97,12 @@
                             data-hora="${t.hora}"
                             data-obrasocialid="${t.obraSocialId}"
                             data-notas="${t.notas}">
-                        ✏ Editar
+                        <i class="fas fa-edit"></i> Modificar
                     </button>
 
-                    <button class="btn btn-danger"
-                            onclick="confirmarCancelar('${t.id}')">🗑 Cancelar</button>
+                    <button class="btn btn-danger" onclick="cancelarTurno('${t.id}')">
+                        <i class="fas fa-ban"></i> Cancelar
+                    </button>
                 </td>
             </tr>
         </c:forEach>
@@ -86,12 +114,11 @@
     <h3 id="modalTitle"></h3>
 
     <form method="post" action="/app/turnos">
-
         <input type="hidden" name="id" id="form-id">
 
-        <label>Paciente:</label>
-        <select id="paciente" name="pacienteId" onchange="onPacienteChange()" required style="width:100%; padding:6px;">
-            <option value="">-- Seleccione --</option>
+        <label><i class="fas fa-user"></i> Paciente:</label>
+        <select id="paciente" name="pacienteId" onchange="onPacienteChange()" required>
+            <option value="">-- Seleccionar paciente --</option>
             <c:forEach var="p" items="${pacientes}">
                 <option value="${p.id}"
                         data-obrasocialid="${p.obraSocialId}"
@@ -102,178 +129,42 @@
         </select>
 
         <br><br>
-        <label>Obra Social del Paciente:</label>
-        <input type="text" id="obra-social-display" readonly style="width:100%; background:#f0f0f0; padding:6px;">
+        <label><i class="fas fa-hospital"></i> Cobertura Médica:</label>
+        <input type="text" id="obra-social-display" readonly style="background:#f0f0f0;">
 
         <br><br>
-        <label>Médico:</label>
-        <select id="medico" name="medicoId" required style="width:100%; padding:6px;">
-            <option value="">-- Seleccione un paciente primero --</option>
+        <label><i class="fas fa-user-md"></i> Médico Tratante:</label>
+        <select id="medico" name="medicoId" required>
+            <option value="">-- Primero seleccione el paciente --</option>
         </select>
 
         <br><br>
-        <label>Fecha:</label>
-        <input type="date" id="fecha" name="fecha" required style="width:100%; padding:6px;">
+        <label><i class="fas fa-calendar"></i> Fecha del Turno:</label>
+        <input type="date" id="fecha" name="fecha" required>
 
         <br><br>
-        <label>Hora:</label>
-        <input type="time" id="hora" name="hora" required style="width:100%; padding:6px;">
+        <label><i class="fas fa-clock"></i> Hora del Turno:</label>
+        <input type="time" id="hora" name="hora" required min="08:00" max="17:45" step="900">
+        <small style="color: #666; font-style: italic;">
+            Horario: 8:00 a 17:45 hs - Intervalos de 15 minutos - Solo días hábiles
+        </small>
 
         <br><br>
-        <label>Notas (opcional):</label>
-        <textarea id="notas" name="notas" style="width:100%; height:60px; padding:6px;"></textarea>
+        <label><i class="fas fa-sticky-note"></i> Observaciones Clínicas:</label>
+        <textarea id="notas" name="notas" style="height:60px;" placeholder="Motivo de consulta, síntomas, observaciones..."></textarea>
 
         <br><br>
-        <button class="btn btn-primary" type="submit">Guardar</button>
-        <button type="button" class="btn" onclick="modalForm.close()">Cancelar</button>
-
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-save"></i> Confirmar Turno
+        </button>
+        <button type="button" class="btn" onclick="modalForm.close()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
     </form>
 </dialog>
 
-<script>
-// DATOS CARGADOS DESDE EL SERVIDOR
-const TODO_MEDICOS = [
-    <c:forEach var="m" items="${medicos}" varStatus="status">
-        {
-            id: ${m.id},
-            nombre: "${m.nombre}",
-            especialidad: "${m.especialidadDescripcion}",
-            obras: [${m.obrasSocialesIdsCsv}]
-        }<c:if test="${!status.last}">,</c:if>
-    </c:forEach>
-];
-
-const TODO_PACIENTES = [
-    <c:forEach var="p" items="${pacientes}" varStatus="status">
-        {
-            id: ${p.id},
-            nombre: "${p.nombre}",
-            obraSocialId: ${p.obraSocialId},
-            obraSocialNombre: "${p.obraSocialNombre}"
-        }<c:if test="${!status.last}">,</c:if>
-    </c:forEach>
-];
-
-console.log("✅ Médicos cargados:", TODO_MEDICOS.length);
-console.log("✅ Pacientes cargados:", TODO_PACIENTES.length);
-
-function resetCampos() {
-    document.getElementById("obra-social-display").value = "";
-    document.getElementById("medico").innerHTML = '<option value="">-- Seleccione un paciente primero --</option>';
-    document.getElementById("notas").value = "";
-}
-
-function abrirNuevo() {
-    document.getElementById("modalTitle").innerText = "Nuevo Turno";
-    document.getElementById("form-id").value = "";
-    document.getElementById("paciente").value = "";
-    document.getElementById("fecha").value = "";
-    document.getElementById("hora").value = "";
-    resetCampos();
-    modalForm.showModal();
-}
-
-function onPacienteChange() {
-    const sel = document.getElementById("paciente");
-    const idPaciente = parseInt(sel.value);
-
-    if (!idPaciente) {
-        resetCampos();
-        return;
-    }
-
-    const paciente = TODO_PACIENTES.find(p => p.id === idPaciente);
-
-    if (!paciente) {
-        console.warn("⚠️ Paciente no encontrado");
-        resetCampos();
-        return;
-    }
-
-    document.getElementById("obra-social-display").value = paciente.obraSocialNombre;
-    cargarMedicos(paciente.obraSocialId);
-}
-
-function cargarMedicos(obraSocialId) {
-    const medicoSelect = document.getElementById("medico");
-    medicoSelect.innerHTML = "";
-
-    if (!obraSocialId) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "-- Sin obra social --";
-        medicoSelect.appendChild(opt);
-        return;
-    }
-
-    const medicosFiltrados = TODO_MEDICOS.filter(medico => {
-        return medico.obras.includes(parseInt(obraSocialId));
-    });
-
-    if (medicosFiltrados.length === 0) {
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "No hay médicos para esta obra social";
-        medicoSelect.appendChild(opt);
-        return;
-    }
-
-    const optDefault = document.createElement("option");
-    optDefault.value = "";
-    optDefault.textContent = "-- Seleccione un médico --";
-    medicoSelect.appendChild(optDefault);
-
-    medicosFiltrados.forEach(medico => {
-        const opt = document.createElement("option");
-        opt.value = medico.id;
-        opt.textContent = medico.nombre + " (" + medico.especialidad + ")";
-        medicoSelect.appendChild(opt);
-    });
-}
-
-function confirmarCancelar(id) {
-    if (confirm("¿Cancelar turno?")) {
-        window.location.href = "/app/turnos/cancelar/" + id;
-    }
-}
-
-function abrirEditar(turno) {
-    document.getElementById("modalTitle").innerText = "Editar Turno";
-    document.getElementById("form-id").value = turno.id;
-    document.getElementById("paciente").value = turno.pacienteId;
-    document.getElementById("fecha").value = turno.fecha;
-    document.getElementById("hora").value = turno.hora;
-    document.getElementById("notas").value = turno.notas || "";
-
-    onPacienteChange();
-
-    setTimeout(() => {
-        document.getElementById("medico").value = turno.medicoId;
-    }, 100);
-
-    modalForm.showModal();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    const btns = document.querySelectorAll(".btn-editar");
-
-    btns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const turno = {
-                id:            btn.dataset.id,
-                pacienteId:    parseInt(btn.dataset.pacienteid),
-                medicoId:      parseInt(btn.dataset.medicoid),
-                fecha:         btn.dataset.fecha,
-                hora:          btn.dataset.hora.substring(0, 5),
-                obraSocialId:  parseInt(btn.dataset.obrasocialid),
-                notas:         btn.dataset.notas || ""
-            };
-
-            abrirEditar(turno);
-        });
-    });
-});
-</script>
+<!-- Incluir sistema de alertas -->
+<jsp:include page="/WEB-INF/includes/alerts.jsp" />
 
 </body>
 </html>

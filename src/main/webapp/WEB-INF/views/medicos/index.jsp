@@ -4,66 +4,22 @@
 <html>
 <head>
     <title>Médicos - Salud Total</title>
-    <link rel="stylesheet" href="/css/styles.css">
-
-    <script>
-    function abrirNuevo() {
-        document.getElementById("modalTitle").innerText = "Nuevo Médico";
-        document.getElementById("form-action").value = "crear";
-        document.getElementById("form-id").value = "";
-
-        document.getElementById("form-nombre").value = "";
-        document.getElementById("form-especialidad").value = "";
-        document.getElementById("form-matricula").value = "";
-
-        document.querySelectorAll(".chk-obra").forEach(chk => chk.checked = false);
-
-        modalForm.showModal();
-    }
-
-    function abrirEditar(id, nombre, especialidadId, matricula, obrasCsv) {
-        document.getElementById("modalTitle").innerText = "Editar Médico";
-        document.getElementById("form-action").value = "actualizar";
-        document.getElementById("form-id").value = id;
-
-        document.getElementById("form-nombre").value = nombre;
-        document.getElementById("form-especialidad").value = especialidadId;
-        document.getElementById("form-matricula").value = matricula;
-
-        const obras = obrasCsv.split(",").map(x => x.trim());
-
-        document.querySelectorAll(".chk-obra").forEach(chk => {
-            chk.checked = obras.includes(chk.value);
-        });
-
-        modalForm.showModal();
-    }
-
-    function confirmarEliminar(id) {
-        if (confirm("¿Eliminar este médico?")) {
-            window.location.href = "/app/medicos/eliminar/" + id;
-        }
-    }
-    </script>
+    <jsp:include page="/WEB-INF/includes/header.jsp" />
+    <link rel="stylesheet" href="/css/medicos.css">
+    <script src="/js/medicos.js"></script>
 </head>
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-    <h2>Salud Total</h2>
-    <a href="/app/">🏠 Inicio</a>
-    <a class="active" href="/app/medicos">👨‍⚕️ Médicos</a>
-    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="/app/obras-sociales">🏥 Obras Sociales</a>
-    <a href="/app/turnos">📅 Turnos</a>
-    <a href="/app/reportes">📊 Reportes</a>
-</div>
+<jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
 <!-- CONTENIDO -->
 <div class="content">
 
-    <h2>Médicos</h2>
-    <button class="btn btn-primary" onclick="abrirNuevo()">➕ Nuevo Médico</button>
+    <h2><i class="fas fa-user-md"></i> Médicos</h2>
+    <button class="btn btn-primary" onclick="abrirNuevo()">
+        <i class="fas fa-plus"></i> Nuevo Médico
+    </button>
 
     <br><br>
 
@@ -96,17 +52,20 @@
                                 '${m.especialidadId}',
                                 '${m.matricula}',
                                 '${m.obrasSocialesIdsCsv}'
-                            )">✏ Editar</button>
+                            )">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
 
-                    <button class="btn btn-danger"
-                            onclick="confirmarEliminar('${m.id}')">🗑 Eliminar</button>
+                    <button class="btn btn-danger" onclick="eliminarMedico('${m.id}')">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
                 </td>
             </tr>
         </c:forEach>
     </table>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL MEJORADO -->
 <dialog id="modalForm">
     <h3 id="modalTitle"></h3>
 
@@ -115,35 +74,57 @@
         <input type="hidden" name="action" id="form-action">
         <input type="hidden" name="id" id="form-id">
 
-        <label>Nombre:</label><br>
-        <input type="text" id="form-nombre" name="nombre" required style="width:100%;"><br><br>
+        <div class="input-label">
+            <i class="fas fa-user"></i>
+            <span>Nombre:</span>
+        </div>
+        <input type="text" id="form-nombre" name="nombre" required>
 
-        <label>Especialidad:</label><br>
-        <select id="form-especialidad" name="especialidadId" required style="width:100%;">
+        <div class="input-label">
+            <i class="fas fa-stethoscope"></i>
+            <span>Especialidad:</span>
+        </div>
+        <select id="form-especialidad" name="especialidadId" required>
             <option value="">-- Seleccione --</option>
             <c:forEach var="e" items="${especialidades}">
                 <option value="${e.id}">${e.descripcion}</option>
             </c:forEach>
-        </select><br><br>
+        </select>
 
-        <label>Matrícula:</label><br>
-        <input type="text" id="form-matricula" name="matricula" required style="width:100%;"><br><br>
+        <div class="input-label">
+            <i class="fas fa-id-badge"></i>
+            <span>Matrícula:</span>
+        </div>
+        <input type="text" id="form-matricula" name="matricula" required>
 
-        <label>Obras Sociales:</label><br>
+        <div class="input-label">
+            <i class="fas fa-hospital"></i>
+            <span>Obras Sociales:</span>
+        </div>
+        
+        <div class="obras-sociales-container">
+            <c:forEach var="o" items="${obrasSociales}">
+                <div class="obra-social-item">
+                    <input type="checkbox" class="chk-obra" name="obrasSocialesIds" value="${o.id}" id="obra-${o.id}">
+                    <label for="obra-${o.id}">${o.nombre}</label>
+                </div>
+            </c:forEach>
+        </div>
 
-        <c:forEach var="o" items="${obrasSociales}">
-            <label>
-                <input type="checkbox" class="chk-obra" name="obrasSocialesIds" value="${o.id}">
-                ${o.nombre}
-            </label><br>
-        </c:forEach>
-
-        <br>
-        <button class="btn btn-primary" type="submit">Guardar</button>
-        <button type="button" class="btn" onclick="modalForm.close()">Cancelar</button>
+        <div class="modal-buttons">
+            <button type="button" class="btn" onclick="modalForm.close()">
+                <i class="fas fa-times"></i> Cancelar
+            </button>
+            <button class="btn btn-primary" type="submit">
+                <i class="fas fa-save"></i> Guardar
+            </button>
+        </div>
 
     </form>
 </dialog>
+
+<!-- Incluir sistema de alertas -->
+<jsp:include page="/WEB-INF/includes/alerts.jsp" />
 
 </body>
 </html>

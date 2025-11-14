@@ -4,6 +4,7 @@ import com.app.models.Medico;
 import com.app.repositories.EspecialidadRepository;
 import com.app.repositories.MedicoRepository;
 import com.app.repositories.ObraSocialRepository;
+import com.app.utils.AlertUtils;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -33,10 +34,29 @@ public class MedicoController {
     // ============================================
     @GET
     @View("medicos/index.jsp")
-    public void listar() {
+    public void listar(
+            @QueryParam("success") String success,
+            @QueryParam("error") String error,
+            @QueryParam("warning") String warning,
+            @QueryParam("info") String info
+    ) {
         models.put("medicos", repo.listar());
         models.put("obrasSociales", repoObras.listar());
         models.put("especialidades", repoEspecialidades.listar());
+        
+        // Pasar mensajes desde parámetros URL
+        if (success != null && !success.isEmpty()) {
+            models.put("success", success);
+        }
+        if (error != null && !error.isEmpty()) {
+            models.put("error", error);
+        }
+        if (warning != null && !warning.isEmpty()) {
+            models.put("warning", warning);
+        }
+        if (info != null && !info.isEmpty()) {
+            models.put("info", info);
+        }
     }
 
     // ============================================
@@ -63,19 +83,27 @@ public class MedicoController {
                 m.setActivo(true);
                 m.setObrasSocialesIds(obras);
                 repo.insertar(m);
+                
+                return AlertUtils.redirectWithSuccess("/medicos", 
+                    "Médico " + nombre + " creado exitosamente");
 
             } else if ("actualizar".equals(action)) {
 
                 Medico m = new Medico(id, nombre, especialidadId, matricula, true);
                 m.setObrasSocialesIds(obras);
                 repo.actualizar(m);
+                
+                return AlertUtils.redirectWithSuccess("/medicos", 
+                    "Médico " + nombre + " actualizado exitosamente");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
+            return AlertUtils.redirectWithError("/medicos", 
+                "Error al guardar el médico: " + e.getMessage());
         }
 
-        return "redirect:/medicos";
+        return AlertUtils.redirectWithInfo("/medicos", "Operación completada");
     }
 
     // ============================================
@@ -84,7 +112,27 @@ public class MedicoController {
     @GET
     @Path("/eliminar/{id}")
     public String eliminar(@PathParam("id") int id) {
-        repo.eliminar(id);
-        return "redirect:/medicos";
+        try {
+            // Obtener datos del médico antes de eliminar
+            List<Medico> medicos = repo.listar();
+            Medico medico = medicos.stream()
+                                  .filter(m -> m.getId() == id)
+                                  .findFirst()
+                                  .orElse(null);
+            
+            repo.eliminar(id);
+            
+            String mensaje = "Médico eliminado exitosamente";
+            if (medico != null) {
+                mensaje = "Médico " + medico.getNombre() + " eliminado exitosamente";
+            }
+            
+            return AlertUtils.redirectWithSuccess("/medicos", mensaje);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AlertUtils.redirectWithError("/medicos", 
+                "Error al eliminar el médico: " + e.getMessage());
+        }
     }
 }

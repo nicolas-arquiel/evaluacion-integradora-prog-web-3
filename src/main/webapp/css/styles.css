@@ -140,7 +140,7 @@ tr:last-child td {
 }
 
 /* ========================================
-   MODAL
+   MODAL - CENTRADO Y MEJORADO
 ======================================== */
 
 dialog {
@@ -148,7 +148,15 @@ dialog {
     border-radius: 8px;
     padding: 20px;
     width: 420px;
+    max-width: 90vw;
     box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    
+    /* CENTRAR EL MODAL */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
 }
 
 dialog::backdrop {
@@ -168,6 +176,10 @@ dialog label {
     color: #333;
 }
 
+/* ========================================
+   INPUTS Y SELECTS MEJORADOS
+======================================== */
+
 dialog input,
 dialog select,
 dialog textarea {
@@ -177,17 +189,49 @@ dialog textarea {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    background-color: white !important; /* Forzar fondo blanco */
+    color: #333 !important; /* Color de texto oscuro */
 }
 
+/* Estilos específicos para select */
+dialog select {
+    background-image: linear-gradient(45deg, transparent 50%, #999 50%), 
+                      linear-gradient(135deg, #999 50%, transparent 50%);
+    background-position: calc(100% - 15px) calc(1em + 2px), 
+                         calc(100% - 10px) calc(1em + 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    appearance: none; /* Remover flecha nativa */
+    cursor: pointer;
+}
+
+/* Estados de focus */
 dialog input:focus,
 dialog select:focus,
 dialog textarea:focus {
     outline: none;
     border-color: #2d3e50;
+    box-shadow: 0 0 5px rgba(45, 62, 80, 0.3);
+    background-color: white !important;
+}
+
+/* Estados disabled */
+dialog input:disabled,
+dialog select:disabled,
+dialog textarea:disabled {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    cursor: not-allowed;
+    border-color: #ccc;
+}
+
+/* Hover para selects */
+dialog select:hover:not(:disabled) {
+    border-color: #666;
 }
 
 /* ========================================
-   FILTROS
+   FILTROS MEJORADOS
 ======================================== */
 
 .filtros {
@@ -205,6 +249,19 @@ dialog textarea:focus {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    background-color: white !important;
+    color: #333 !important;
+}
+
+.filtros select {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, #999 50%), 
+                      linear-gradient(135deg, #999 50%, transparent 50%);
+    background-position: calc(100% - 15px) calc(1em + 2px), 
+                         calc(100% - 10px) calc(1em + 2px);
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    cursor: pointer;
 }
 
 /* ========================================
