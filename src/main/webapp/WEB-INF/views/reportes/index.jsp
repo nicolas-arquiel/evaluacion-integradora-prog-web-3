@@ -4,7 +4,7 @@
 <html>
 <head>
     <title>Reportes y Estadísticas - Salud Total</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/reportes.css">
 
     <style>
         /* === ESTILOS ESPECÍFICOS DE REPORTES === */
