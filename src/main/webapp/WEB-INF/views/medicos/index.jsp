@@ -54,13 +54,13 @@ function abrirNuevo() {
     modalForm.showModal();
 }
 
-function abrirEditar(id, nombre, especialidad, matricula, obrasCsv) {
+function abrirEditar(id, nombre, especialidadId, matricula, obrasCsv) {
     document.getElementById("modalTitle").innerText = "Editar Médico";
     document.getElementById("form-action").value = "actualizar";
     document.getElementById("form-id").value = id;
 
     document.getElementById("form-nombre").value = nombre;
-    document.getElementById("form-especialidad").value = especialidad;
+    document.getElementById("form-especialidad").value = especialidadId;
     document.getElementById("form-matricula").value = matricula;
 
     const obras = obrasCsv.split(",").map(x => x.trim());
@@ -74,7 +74,7 @@ function abrirEditar(id, nombre, especialidad, matricula, obrasCsv) {
 
 function confirmarEliminar(id) {
     if (confirm("¿Eliminar este médico?")) {
-        window.location.href = `/medicos/eliminar/${id}`;
+        window.location.href = "${pageContext.request.contextPath}/medicos/eliminar/" + id;
     }
 }
 </script>
@@ -90,6 +90,7 @@ function confirmarEliminar(id) {
     <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
     <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
     <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
+    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
 </div>
 
 <!-- CONTENIDO -->
@@ -113,8 +114,8 @@ function confirmarEliminar(id) {
         <c:forEach var="m" items="${medicos}">
             <tr>
                 <td>${m.id}</td>
-                <td>${m.nombreCompleto}</td>
-                <td>${m.especialidad}</td>
+                <td>${m.nombre}</td>
+                <td>${m.especialidadDescripcion}</td>
                 <td>${m.matricula}</td>
                 <td>
                     <c:forEach var="o" items="${m.obrasSociales}">
@@ -125,8 +126,8 @@ function confirmarEliminar(id) {
                     <button class="btn btn-primary"
                             onclick="abrirEditar(
                                 '${m.id}',
-                                '${m.nombreCompleto}',
-                                '${m.especialidad}',
+                                '${m.nombre}',
+                                '${m.especialidadId}',
                                 '${m.matricula}',
                                 '${m.obrasSocialesIdsCsv}'
                             )">✏ Editar</button>
@@ -148,11 +149,16 @@ function confirmarEliminar(id) {
         <input type="hidden" name="action" id="form-action">
         <input type="hidden" name="id" id="form-id">
 
-        <label>Nombre Completo:</label><br>
-        <input type="text" id="form-nombre" name="nombreCompleto" required style="width:100%;"><br><br>
+        <label>Nombre:</label><br>
+        <input type="text" id="form-nombre" name="nombre" required style="width:100%;"><br><br>
 
         <label>Especialidad:</label><br>
-        <input type="text" id="form-especialidad" name="especialidad" required style="width:100%;"><br><br>
+        <select id="form-especialidad" name="especialidadId" required style="width:100%;">
+            <option value="">-- Seleccione --</option>
+            <c:forEach var="e" items="${especialidades}">
+                <option value="${e.id}">${e.descripcion}</option>
+            </c:forEach>
+        </select><br><br>
 
         <label>Matrícula:</label><br>
         <input type="text" id="form-matricula" name="matricula" required style="width:100%;"><br><br>

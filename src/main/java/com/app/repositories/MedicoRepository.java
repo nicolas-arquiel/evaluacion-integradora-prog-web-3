@@ -12,7 +12,12 @@ public class MedicoRepository {
 
     public List<Medico> listar() {
         List<Medico> medicos = new ArrayList<>();
-        String sql = "SELECT * FROM medicos ORDER BY id";
+        String sql = """
+            SELECT m.*, e.descripcion as especialidad_nombre
+            FROM medicos m
+            INNER JOIN especialidades e ON m.especialidad_id = e.id
+            ORDER BY m.id
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -21,21 +26,22 @@ public class MedicoRepository {
             while (rs.next()) {
 
                 Medico m = new Medico(
-                        rs.getInt("id"),
-                        rs.getString("nombre_completo"),
-                        rs.getString("especialidad"),
-                        rs.getString("matricula"),
-                        rs.getBoolean("activo")
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getInt("especialidad_id"),
+                    rs.getString("matricula"),
+                    rs.getBoolean("activo")
                 );
 
+                m.setEspecialidadDescripcion(rs.getString("especialidad_nombre"));
                 m.setObrasSocialesIds(obrasPorMedico(m.getId()));
                 m.setObrasSociales(listarObras(m.getObrasSocialesIds()));
 
                 m.setObrasSocialesIdsCsv(
-                        m.getObrasSocialesIds()
-                                .stream()
-                                .map(Object::toString)
-                                .collect(Collectors.joining(","))
+                    m.getObrasSocialesIds()
+                        .stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(","))
                 );
 
                 medicos.add(m);
@@ -48,13 +54,13 @@ public class MedicoRepository {
     }
 
     public void insertar(Medico m) throws SQLException {
-        String sql = "INSERT INTO medicos (nombre_completo, especialidad, matricula, activo) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO medicos (nombre, especialidad_id, matricula, activo) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, m.getNombreCompleto());
-            ps.setString(2, m.getEspecialidad());
+            ps.setString(1, m.getNombre());
+            ps.setInt(2, m.getEspecialidadId());
             ps.setString(3, m.getMatricula());
             ps.setBoolean(4, m.isActivo());
             ps.executeUpdate();
@@ -67,7 +73,12 @@ public class MedicoRepository {
     }
 
     public Medico obtenerPorId(int id) {
-        String sql = "SELECT * FROM medicos WHERE id = ?";
+        String sql = """
+            SELECT m.*, e.descripcion as especialidad_nombre
+            FROM medicos m
+            INNER JOIN especialidades e ON m.especialidad_id = e.id
+            WHERE m.id = ?
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -78,33 +89,36 @@ public class MedicoRepository {
             if (rs.next()) {
 
                 Medico m = new Medico(
-                        rs.getInt("id"),
-                        rs.getString("nombre_completo"),
-                        rs.getString("especialidad"),
-                        rs.getString("matricula"),
-                        rs.getBoolean("activo")
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getInt("especialidad_id"),
+                    rs.getString("matricula"),
+                    rs.getBoolean("activo")
                 );
 
+                m.setEspecialidadDescripcion(rs.getString("especialidad_nombre"));
                 m.setObrasSocialesIds(obrasPorMedico(id));
                 m.setObrasSociales(listarObras(m.getObrasSocialesIds()));
                 m.setObrasSocialesIdsCsv(
-                        m.getObrasSocialesIds()
-                                .stream().map(Object::toString)
-                                .collect(Collectors.joining(","))
+                    m.getObrasSocialesIds()
+                        .stream()
+                        .map(Object::toString)
+                        .collect(Collectors.joining(","))
                 );
 
                 return m;
             }
 
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
 
         return null;
     }
 
     private List<Integer> obrasPorMedico(int id) {
         List<Integer> ids = new ArrayList<>();
-
-        String sql = "SELECT id_obra_social FROM medicos_obras_sociales WHERE id_medico = ?";
+        String sql = "SELECT obra_social_id FROM medicos_obras_sociales WHERE medico_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -114,7 +128,9 @@ public class MedicoRepository {
 
             while (rs.next()) ids.add(rs.getInt(1));
 
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
 
         return ids;
     }
@@ -124,7 +140,7 @@ public class MedicoRepository {
         if (ids == null || ids.isEmpty()) return lista;
 
         String placeholders = String.join(",", ids.stream().map(x -> "?").toList());
-        String sql = "SELECT id, nombre FROM obras_sociales WHERE id IN (" + placeholders + ")";
+        String sql = "SELECT id, nombre, activo FROM obras_sociales WHERE id IN (" + placeholders + ")";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -136,20 +152,22 @@ public class MedicoRepository {
 
             while (rs.next()) {
                 lista.add(new ObraSocial(
-                        rs.getInt("id"),
-                        rs.getString("nombre"),
-                        true
+                    rs.getInt("id"),
+                    rs.getString("nombre"),
+                    rs.getBoolean("activo")
                 ));
             }
 
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
 
         return lista;
     }
 
     private void actualizarObrasSociales(Connection conn, Medico m) throws SQLException {
         try (PreparedStatement del = conn.prepareStatement(
-                "DELETE FROM medicos_obras_sociales WHERE id_medico = ?")) {
+                "DELETE FROM medicos_obras_sociales WHERE medico_id = ?")) {
 
             del.setInt(1, m.getId());
             del.executeUpdate();
@@ -159,7 +177,7 @@ public class MedicoRepository {
 
         for (Integer idObra : m.getObrasSocialesIds()) {
             try (PreparedStatement ins = conn.prepareStatement(
-                    "INSERT INTO medicos_obras_sociales (id_medico, id_obra_social) VALUES (?, ?)")) {
+                    "INSERT INTO medicos_obras_sociales (medico_id, obra_social_id) VALUES (?, ?)")) {
 
                 ins.setInt(1, m.getId());
                 ins.setInt(2, idObra);
@@ -169,13 +187,13 @@ public class MedicoRepository {
     }
 
     public void actualizar(Medico m) throws SQLException {
-        String sql = "UPDATE medicos SET nombre_completo=?, especialidad=?, matricula=?, activo=? WHERE id=?";
+        String sql = "UPDATE medicos SET nombre=?, especialidad_id=?, matricula=?, activo=? WHERE id=?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, m.getNombreCompleto());
-            ps.setString(2, m.getEspecialidad());
+            ps.setString(1, m.getNombre());
+            ps.setInt(2, m.getEspecialidadId());
             ps.setString(3, m.getMatricula());
             ps.setBoolean(4, m.isActivo());
             ps.setInt(5, m.getId());
@@ -194,6 +212,8 @@ public class MedicoRepository {
             ps.setInt(1, id);
             ps.executeUpdate();
 
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
     }
 }

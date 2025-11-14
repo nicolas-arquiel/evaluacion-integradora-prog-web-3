@@ -1,99 +1,119 @@
 DROP TABLE IF EXISTS turnos CASCADE;
 DROP TABLE IF EXISTS pacientes_obras_sociales CASCADE;
 DROP TABLE IF EXISTS medicos_obras_sociales CASCADE;
-DROP TABLE IF EXISTS estados_turno CASCADE;
+DROP TABLE IF EXISTS estados CASCADE;
+DROP TABLE IF EXISTS especialidades CASCADE;
 DROP TABLE IF EXISTS obras_sociales CASCADE;
 DROP TABLE IF EXISTS pacientes CASCADE;
 DROP TABLE IF EXISTS medicos CASCADE;
 
-CREATE TABLE medicos (
+-- Tabla de Especialidades
+CREATE TABLE especialidades (
     id SERIAL PRIMARY KEY,
-    nombre_completo VARCHAR(100) NOT NULL,
-    especialidad VARCHAR(100) NOT NULL,
-    matricula VARCHAR(50) UNIQUE NOT NULL,
-    activo BOOLEAN DEFAULT TRUE
+    descripcion VARCHAR(255) UNIQUE NOT NULL
 );
 
-CREATE TABLE pacientes (
-    id SERIAL PRIMARY KEY,
-    nombre_completo VARCHAR(100) NOT NULL,
-    telefono VARCHAR(30),
-    documento VARCHAR(20) UNIQUE NOT NULL,
-    activo BOOLEAN DEFAULT TRUE
-);
-
+-- Tabla de Obras Sociales
 CREATE TABLE obras_sociales (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(100) UNIQUE NOT NULL,
+    nombre VARCHAR(255) UNIQUE NOT NULL,
     activo BOOLEAN DEFAULT TRUE
 );
 
-CREATE TABLE estados_turno (
+-- Tabla de Estados
+CREATE TABLE estados (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(50) UNIQUE NOT NULL
+    nombre VARCHAR(255) UNIQUE NOT NULL
 );
 
+-- Tabla de Médicos (con especialidad_id como FK)
+CREATE TABLE medicos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    especialidad_id INTEGER NOT NULL,
+    matricula VARCHAR(50) UNIQUE NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (especialidad_id) REFERENCES especialidades(id)
+);
+
+-- Tabla de Pacientes (con obra_social_id como FK)
+CREATE TABLE pacientes (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    numero_telefono VARCHAR(20),
+    documento VARCHAR(20) UNIQUE NOT NULL,
+    obra_social_id INTEGER NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (obra_social_id) REFERENCES obras_sociales(id)
+);
+
+-- Tabla de Relación Médicos - Obras Sociales (muchos a muchos)
 CREATE TABLE medicos_obras_sociales (
-    id_medico INT NOT NULL,
-    id_obra_social INT NOT NULL,
-    PRIMARY KEY (id_medico, id_obra_social),
-    FOREIGN KEY (id_medico) REFERENCES medicos(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_obra_social) REFERENCES obras_sociales(id) ON DELETE CASCADE
+    medico_id INTEGER NOT NULL,
+    obra_social_id INTEGER NOT NULL,
+    PRIMARY KEY (medico_id, obra_social_id),
+    FOREIGN KEY (medico_id) REFERENCES medicos(id) ON DELETE CASCADE,
+    FOREIGN KEY (obra_social_id) REFERENCES obras_sociales(id) ON DELETE CASCADE
 );
 
-CREATE TABLE pacientes_obras_sociales (
-    id_paciente INT NOT NULL,
-    id_obra_social INT NOT NULL,
-    PRIMARY KEY (id_paciente, id_obra_social),
-    FOREIGN KEY (id_paciente) REFERENCES pacientes(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_obra_social) REFERENCES obras_sociales(id) ON DELETE CASCADE
-);
-
+-- Tabla de Turnos
 CREATE TABLE turnos (
     id SERIAL PRIMARY KEY,
-    id_paciente INT NOT NULL,
-    id_medico INT NOT NULL,
+    paciente_id INTEGER NOT NULL,
+    medico_id INTEGER NOT NULL,
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
-    id_estado INT NOT NULL DEFAULT 1,
-    FOREIGN KEY (id_paciente) REFERENCES pacientes(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_medico) REFERENCES medicos(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_estado) REFERENCES estados_turno(id),
-    CONSTRAINT turno_unico UNIQUE (id_medico, fecha, hora)
+    estado_id INTEGER NOT NULL DEFAULT 1,
+    notas TEXT,
+    activo BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+    FOREIGN KEY (medico_id) REFERENCES medicos(id) ON DELETE CASCADE,
+    FOREIGN KEY (estado_id) REFERENCES estados(id),
+    CONSTRAINT turno_unico UNIQUE (medico_id, fecha, hora)
 );
 
-INSERT INTO estados_turno (nombre) VALUES
-('activo'),
-('cancelado'),
-('completado'),
-('reprogramado');
+-- Insertar Estados
+INSERT INTO estados (nombre) VALUES 
+('programado'), 
+('cancelado'), 
+('completado');
 
-INSERT INTO medicos (nombre_completo, especialidad, matricula) VALUES
-('Dr. Juan Perez', 'Cardiologia', 'CAR-1024'),
-('Dra. Maria Gomez', 'Pediatria', 'PED-2091'),
-('Dr. Carlos Lopez', 'Dermatologia', 'DER-3178');
+-- Insertar Obras Sociales
+INSERT INTO obras_sociales (nombre) VALUES 
+('Salud Unida'), 
+('Solidaridad Protege'), 
+('Vida Integral'), 
+('Bienestar Comunitario'), 
+('Protección Activa'), 
+('Sin obra social');
 
-INSERT INTO pacientes (nombre_completo, telefono, documento) VALUES
-('Ana Torres', '1122334455', '30123456'),
-('Luis Fernandez', '1198765432', '28999888');
+-- Insertar Especialidades
+INSERT INTO especialidades (descripcion) VALUES 
+('Cardiología'), 
+('Dermatología'), 
+('Pediatría');
 
-INSERT INTO obras_sociales (nombre) VALUES
-('OSDE'),
-('Swiss Medical'),
-('IOMA'),
-('PAMI');
+-- Insertar Médicos
+INSERT INTO medicos (nombre, especialidad_id, matricula) VALUES
+('Dr. Juan Perez', 1, 'CAR-1024'),
+('Dra. Maria Gomez', 3, 'PED-2091'),
+('Dr. Carlos Lopez', 2, 'DER-3178');
 
-INSERT INTO medicos_obras_sociales (id_medico, id_obra_social) VALUES
-(1, 1),
-(1, 2),
-(2, 1),
-(2, 4),
-(3, 3);
+-- Insertar Pacientes
+INSERT INTO pacientes (nombre, email, numero_telefono, documento, obra_social_id) VALUES
+('Ana Torres', 'ana.torres@email.com', '1122334455', '30123456', 1),
+('Luis Fernandez', 'luis.fernandez@email.com', '1198765432', '28999888', 6);
 
-INSERT INTO pacientes_obras_sociales (id_paciente, id_obra_social) VALUES
-(1, 1),
-(2, 4);
+-- Insertar relación Médicos - Obras Sociales
+INSERT INTO medicos_obras_sociales (medico_id, obra_social_id) VALUES
+(1, 1),  -- Dr. Juan Perez con Salud Unida
+(1, 2),  -- Dr. Juan Perez con Solidaridad Protege
+(2, 1),  -- Dra. Maria Gomez con Salud Unida
+(2, 6),  -- Dra. Maria Gomez con Sin obra social
+(3, 3);  -- Dr. Carlos Lopez con Vida Integral
 
-INSERT INTO turnos (id_paciente, id_medico, fecha, hora, id_estado) VALUES
+-- Insertar Turnos
+INSERT INTO turnos (paciente_id, medico_id, fecha, hora, estado_id) VALUES
 (1, 1, '2025-11-14', '10:00', 1),
 (2, 2, '2025-11-15', '11:30', 1);

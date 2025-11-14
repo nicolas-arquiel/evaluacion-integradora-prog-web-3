@@ -3,6 +3,7 @@ package com.app.controllers;
 import com.app.models.Paciente;
 import com.app.repositories.PacienteRepository;
 import com.app.repositories.ObraSocialRepository;
+
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.mvc.Controller;
@@ -12,7 +13,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
 import java.sql.SQLException;
-import java.util.List;
 
 @RequestScoped
 @Path("/pacientes")
@@ -43,27 +43,28 @@ public class PacienteController {
     public String guardar(
             @FormParam("action") String action,
             @FormParam("id") Integer id,
-            @FormParam("nombreCompleto") String nombre,
-            @FormParam("telefono") String telefono,
+            @FormParam("nombre") String nombre,
+            @FormParam("email") String email,
+            @FormParam("numeroTelefono") String numeroTelefono,
             @FormParam("documento") String documento,
-            @FormParam("obrasSocialesIds") List<Integer> obrasIds
+            @FormParam("obraSocialId") int obraSocialId
     ) {
 
         try {
             if ("crear".equals(action)) {
                 Paciente p = new Paciente();
-                p.setNombreCompleto(nombre);
-                p.setTelefono(telefono);
+                p.setNombre(nombre);
+                p.setEmail(email);
+                p.setNumeroTelefono(numeroTelefono);
                 p.setDocumento(documento);
+                p.setObraSocialId(obraSocialId);
                 p.setActivo(true);
-                p.setObrasSocialesIds(obrasIds);
 
                 repo.insertar(p);
 
             } else if ("actualizar".equals(action)) {
-                Paciente p = new Paciente(id, nombre, telefono, documento, true);
-                p.setObrasSocialesIds(obrasIds);
-
+                Paciente p = new Paciente(id, nombre, email, numeroTelefono, 
+                                         documento, obraSocialId, true);
                 repo.actualizar(p);
             }
 

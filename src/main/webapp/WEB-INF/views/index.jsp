@@ -122,6 +122,8 @@
                 <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
                 <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
                 <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
+                <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
+
             </div>
 
 

@@ -5,21 +5,22 @@ import java.util.List;
 public class Medico {
 
     private int id;
-    private String nombreCompleto;
-    private String especialidad;
+    private String nombre;
+    private int especialidadId;
+    private String especialidadDescripcion;  // Para mostrar en vistas
     private String matricula;
     private boolean activo;
 
     private List<Integer> obrasSocialesIds;
-    private List<ObraSocial> obrasSociales;   // NUEVO
-    private String obrasSocialesIdsCsv;       // NUEVO
+    private List<ObraSocial> obrasSociales;
+    private String obrasSocialesIdsCsv;
 
     public Medico() {}
 
-    public Medico(int id, String nombreCompleto, String especialidad, String matricula, boolean activo) {
+    public Medico(int id, String nombre, int especialidadId, String matricula, boolean activo) {
         this.id = id;
-        this.nombreCompleto = nombreCompleto;
-        this.especialidad = especialidad;
+        this.nombre = nombre;
+        this.especialidadId = especialidadId;
         this.matricula = matricula;
         this.activo = activo;
     }
@@ -27,11 +28,16 @@ public class Medico {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public String getNombreCompleto() { return nombreCompleto; }
-    public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getEspecialidad() { return especialidad; }
-    public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
+    public int getEspecialidadId() { return especialidadId; }
+    public void setEspecialidadId(int especialidadId) { this.especialidadId = especialidadId; }
+
+    public String getEspecialidadDescripcion() { return especialidadDescripcion; }
+    public void setEspecialidadDescripcion(String especialidadDescripcion) { 
+        this.especialidadDescripcion = especialidadDescripcion; 
+    }
 
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }
@@ -40,11 +46,17 @@ public class Medico {
     public void setActivo(boolean activo) { this.activo = activo; }
 
     public List<Integer> getObrasSocialesIds() { return obrasSocialesIds; }
-    public void setObrasSocialesIds(List<Integer> obrasSocialesIds) { this.obrasSocialesIds = obrasSocialesIds; }
+    public void setObrasSocialesIds(List<Integer> obrasSocialesIds) { 
+        this.obrasSocialesIds = obrasSocialesIds; 
+    }
 
     public List<ObraSocial> getObrasSociales() { return obrasSociales; }
-    public void setObrasSociales(List<ObraSocial> obrasSociales) { this.obrasSociales = obrasSociales; }
+    public void setObrasSociales(List<ObraSocial> obrasSociales) { 
+        this.obrasSociales = obrasSociales; 
+    }
 
     public String getObrasSocialesIdsCsv() { return obrasSocialesIdsCsv; }
-    public void setObrasSocialesIdsCsv(String obrasSocialesIdsCsv) { this.obrasSocialesIdsCsv = obrasSocialesIdsCsv; }
+    public void setObrasSocialesIdsCsv(String obrasSocialesIdsCsv) { 
+        this.obrasSocialesIdsCsv = obrasSocialesIdsCsv; 
+    }
 }

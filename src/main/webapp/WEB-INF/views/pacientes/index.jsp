@@ -29,6 +29,8 @@
     th, td { padding:10px; border-bottom:1px solid #ddd; }
     th { background:#2d3e50; color:white; }
 
+    tr:hover { background:#f9f9f9; }
+
     .btn { padding:8px 14px; border:none; border-radius:4px; cursor:pointer; }
     .btn-primary { background:#2d3e50; color:white; }
     .btn-danger { background:#d9534f; color:white; }
@@ -44,35 +46,31 @@ function abrirNuevo() {
     document.getElementById("form-id").value = "";
 
     document.getElementById("form-nombre").value = "";
+    document.getElementById("form-email").value = "";
     document.getElementById("form-telefono").value = "";
     document.getElementById("form-documento").value = "";
-
-    document.querySelectorAll(".chk-obra").forEach(chk => chk.checked = false);
+    document.getElementById("form-obra-social").value = "";
 
     modalForm.showModal();
 }
 
-function abrirEditar(id, nombre, telefono, documento, obrasStr) {
+function abrirEditar(id, nombre, email, telefono, documento, obraSocialId) {
     document.getElementById("modalTitle").innerText = "Editar Paciente";
     document.getElementById("form-action").value = "actualizar";
     document.getElementById("form-id").value = id;
 
     document.getElementById("form-nombre").value = nombre;
+    document.getElementById("form-email").value = email;
     document.getElementById("form-telefono").value = telefono;
     document.getElementById("form-documento").value = documento;
-
-    const obras = obrasStr.split(",").map(x => x.trim());
-
-    document.querySelectorAll(".chk-obra").forEach(chk => {
-        chk.checked = obras.includes(chk.value);
-    });
+    document.getElementById("form-obra-social").value = obraSocialId;
 
     modalForm.showModal();
 }
 
 function confirmarEliminar(id) {
     if (confirm("¿Eliminar este paciente?")) {
-        window.location.href = `/pacientes/eliminar/${id}`;
+        window.location.href = "${pageContext.request.contextPath}/pacientes/eliminar/" + id;
     }
 }
 </script>
@@ -88,6 +86,7 @@ function confirmarEliminar(id) {
     <a class="active" href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
     <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
     <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
+    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
 </div>
 
 <!-- CONTENIDO -->
@@ -102,31 +101,30 @@ function confirmarEliminar(id) {
         <tr>
             <th>ID</th>
             <th>Nombre</th>
+            <th>Email</th>
             <th>Teléfono</th>
             <th>Documento</th>
-            <th>Obras Sociales</th>
+            <th>Obra Social</th>
             <th>Acciones</th>
         </tr>
 
         <c:forEach var="p" items="${pacientes}">
             <tr>
                 <td>${p.id}</td>
-                <td>${p.nombreCompleto}</td>
-                <td>${p.telefono}</td>
+                <td>${p.nombre}</td>
+                <td>${p.email}</td>
+                <td>${p.numeroTelefono}</td>
                 <td>${p.documento}</td>
-                <td>
-                    <c:forEach var="o" items="${p.obrasSociales}">
-                        ${o.nombre}<br/>
-                    </c:forEach>
-                </td>
+                <td>${p.obraSocialNombre}</td>
                 <td>
                     <button class="btn btn-primary"
                             onclick="abrirEditar(
                                 '${p.id}',
-                                '${p.nombreCompleto}',
-                                '${p.telefono}',
+                                '${p.nombre}',
+                                '${p.email}',
+                                '${p.numeroTelefono}',
                                 '${p.documento}',
-                                '${p.obrasSocialesIdsCsv}'
+                                '${p.obraSocialId}'
                             )">✏ Editar</button>
 
                     <button class="btn btn-danger"
@@ -148,23 +146,25 @@ function confirmarEliminar(id) {
         <input type="hidden" name="action" id="form-action">
         <input type="hidden" name="id" id="form-id">
 
-        <label>Nombre Completo:</label><br>
-        <input type="text" id="form-nombre" name="nombreCompleto" required style="width:100%;"><br><br>
+        <label>Nombre:</label><br>
+        <input type="text" id="form-nombre" name="nombre" required style="width:100%;"><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" id="form-email" name="email" style="width:100%;"><br><br>
 
         <label>Teléfono:</label><br>
-        <input type="text" id="form-telefono" name="telefono" style="width:100%;"><br><br>
+        <input type="text" id="form-telefono" name="numeroTelefono" style="width:100%;"><br><br>
 
         <label>Documento:</label><br>
         <input type="text" id="form-documento" name="documento" required style="width:100%;"><br><br>
 
-        <label>Obras Sociales:</label><br>
-
-        <c:forEach var="o" items="${obrasSociales}">
-            <label>
-                <input type="checkbox" class="chk-obra" name="obrasSocialesIds" value="${o.id}">
-                ${o.nombre}
-            </label><br>
-        </c:forEach>
+        <label>Obra Social:</label><br>
+        <select id="form-obra-social" name="obraSocialId" required style="width:100%;">
+            <option value="">-- Seleccione --</option>
+            <c:forEach var="o" items="${obrasSociales}">
+                <option value="${o.id}">${o.nombre}</option>
+            </c:forEach>
+        </select><br><br>
 
         <br>
         <button class="btn btn-primary" type="submit">Guardar</button>

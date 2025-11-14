@@ -3,45 +3,44 @@
 
 <html>
 <head>
-<title>Turnos</title>
+    <title>Turnos</title>
 
-<style>
-    body { margin:0; display:flex; font-family:Arial; background:#f4f4f4; }
+    <style>
+        body { margin:0; display:flex; font-family:Arial; background:#f4f4f4; }
 
-    .sidebar {
-        width:220px; background:#2d3e50; color:white;
-        padding:15px; height:100vh;
-    }
-    .sidebar a {
-        color:white; padding:10px; display:block;
-        text-decoration:none; border-radius:4px;
-    }
-    .sidebar a:hover, .active {
-        background:#f1cc31; color:black !important; font-weight:bold;
-    }
+        .sidebar {
+            width:220px; background:#2d3e50; color:white;
+            padding:15px; height:100vh;
+        }
+        .sidebar a {
+            color:white; padding:10px; display:block;
+            text-decoration:none; border-radius:4px;
+        }
+        .sidebar a:hover, .active {
+            background:#f1cc31; color:black !important; font-weight:bold;
+        }
 
-    .content { flex:1; padding:25px; }
+        .content { flex:1; padding:25px; }
 
-    table {
-        width:100%; border-collapse:collapse;
-        background:white; border-radius:6px;
-    }
-    th, td { padding:10px; border-bottom:1px solid #ddd; }
-    th { background:#2d3e50; color:white; }
+        table {
+            width:100%; border-collapse:collapse;
+            background:white; border-radius:6px;
+        }
+        th, td { padding:10px; border-bottom:1px solid #ddd; }
+        th { background:#2d3e50; color:white; }
 
-    tr:hover { background:#f9f9f9; }
+        tr:hover { background:#f9f9f9; }
 
-    .btn { padding:8px 14px; border:none; border-radius:4px; cursor:pointer; }
-    .btn-primary { background:#2d3e50; color:white; }
-    .btn-danger { background:#d9534f; color:white; }
+        .btn { padding:8px 14px; border:none; border-radius:4px; cursor:pointer; }
+        .btn-primary { background:#2d3e50; color:white; }
+        .btn-danger { background:#d9534f; color:white; }
 
-    dialog { border:none; border-radius:8px; padding:20px; width:420px; }
-    dialog::backdrop { background:rgba(0,0,0,0.4); }
+        dialog { border:none; border-radius:8px; padding:20px; width:420px; }
+        dialog::backdrop { background:rgba(0,0,0,0.4); }
 
-    .filtros { display:flex; gap:15px; margin-bottom:20px; }
-    .filtros input, .filtros select { padding:6px; }
-</style>
-
+        .filtros { display:flex; gap:15px; margin-bottom:20px; }
+        .filtros input, .filtros select { padding:6px; }
+    </style>
 </head>
 <body>
 
@@ -52,6 +51,7 @@
     <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
     <a href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
     <a class="active" href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
+    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
 </div>
 
 <div class="content">
@@ -65,14 +65,14 @@
     <!-- FILTROS -->
     <form method="get" class="filtros">
         <select name="idMedico">
-            <option value="">-- Médico --</option>
+            <option value="">-- Todos los médicos --</option>
             <c:forEach var="m" items="${medicos}">
-                <option value="${m.id}">${m.nombreCompleto}</option>
+                <option value="${m.id}">${m.nombre} (${m.especialidadDescripcion})</option>
             </c:forEach>
         </select>
 
-        <input type="date" name="desde">
-        <input type="date" name="hasta">
+        <input type="date" name="desde" placeholder="Desde">
+        <input type="date" name="hasta" placeholder="Hasta">
 
         <button class="btn btn-primary" type="submit">Filtrar</button>
     </form>
@@ -98,19 +98,19 @@
                 <td>${t.hora}</td>
                 <td>${t.estadoNombre}</td>
                 <td>
-
                     <button class="btn btn-primary btn-editar"
-                        data-id="${t.id}"
-                        data-idpaciente="${t.idPaciente}"
-                        data-idmedico="${t.idMedico}"
-                        data-fecha="${t.fecha}"
-                        data-hora="${t.hora}"
-                        data-obras="${t.obrasIdsCsv}">
+                            data-id="${t.id}"
+                            data-pacienteid="${t.pacienteId}"
+                            data-medicoid="${t.medicoId}"
+                            data-fecha="${t.fecha}"
+                            data-hora="${t.hora}"
+                            data-obrasocialid="${t.obraSocialId}"
+                            data-notas="${t.notas}">
                         ✏ Editar
                     </button>
 
                     <button class="btn btn-danger"
-                        onclick="confirmarCancelar('${t.id}')">🗑 Cancelar</button>
+                            onclick="confirmarCancelar('${t.id}')">🗑 Cancelar</button>
                 </td>
             </tr>
         </c:forEach>
@@ -126,24 +126,38 @@
         <input type="hidden" name="id" id="form-id">
 
         <label>Paciente:</label>
-        <select id="paciente" name="idPaciente" onchange="onPacienteChange()" required style="width:100%;">
+        <select id="paciente" name="pacienteId" onchange="onPacienteChange()" required style="width:100%; padding:6px;">
             <option value="">-- Seleccione --</option>
             <c:forEach var="p" items="${pacientes}">
-                <option value="${p.id}">${p.nombreCompleto}</option>
+                <option value="${p.id}"
+                        data-obrasocialid="${p.obraSocialId}"
+                        data-obrasocialnombre="${p.obraSocialNombre}">
+                    ${p.nombre}
+                </option>
             </c:forEach>
         </select>
 
-        <label>Obras Sociales:</label>
-        <select id="obras" multiple size="4" onchange="cargarMedicos()" style="width:100%;"></select>
+        <br><br>
+        <label>Obra Social del Paciente:</label>
+        <input type="text" id="obra-social-display" readonly style="width:100%; background:#f0f0f0; padding:6px;">
 
+        <br><br>
         <label>Médico:</label>
-        <select id="medico" name="idMedico" required style="width:100%;"></select>
+        <select id="medico" name="medicoId" required style="width:100%; padding:6px;">
+            <option value="">-- Seleccione un paciente primero --</option>
+        </select>
 
+        <br><br>
         <label>Fecha:</label>
-        <input type="date" id="fecha" name="fecha" required style="width:100%;">
+        <input type="date" id="fecha" name="fecha" required style="width:100%; padding:6px;">
 
+        <br><br>
         <label>Hora:</label>
-        <input type="time" id="hora" name="hora" required style="width:100%;">
+        <input type="time" id="hora" name="hora" required style="width:100%; padding:6px;">
+
+        <br><br>
+        <label>Notas (opcional):</label>
+        <textarea id="notas" name="notas" style="width:100%; height:60px; padding:6px;"></textarea>
 
         <br><br>
         <button class="btn btn-primary" type="submit">Guardar</button>
@@ -152,194 +166,204 @@
     </form>
 </dialog>
 
+<!-- ========================================================== -->
+<!-- DATOS EMBEBIDOS EN JAVASCRIPT                               -->
+<!-- ========================================================== -->
+
 <script>
+// DATOS CARGADOS DESDE EL SERVIDOR
+const TODO_MEDICOS = [
+    <c:forEach var="m" items="${medicos}" varStatus="status">
+        {
+            id: ${m.id},
+            nombre: "${m.nombre}",
+            especialidad: "${m.especialidadDescripcion}",
+            obras: [${m.obrasSocialesIdsCsv}]
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
-// ======================================================
-// CONFIGURACIÓN FIJA QUE SIEMPRE FUNCIONA
-// ======================================================
-const baseUrl = "/turnos";  
-console.log("BASE URL:", baseUrl);
+const TODO_PACIENTES = [
+    <c:forEach var="p" items="${pacientes}" varStatus="status">
+        {
+            id: ${p.id},
+            nombre: "${p.nombre}",
+            obraSocialId: ${p.obraSocialId},
+            obraSocialNombre: "${p.obraSocialNombre}"
+        }<c:if test="${!status.last}">,</c:if>
+    </c:forEach>
+];
 
+console.log("✅ Médicos cargados:", TODO_MEDICOS.length);
+console.log("✅ Pacientes cargados:", TODO_PACIENTES.length);
 
-// ======================================================
-// LOG HELPERS
-// ======================================================
-function log(...a) { console.log("🔵", ...a); }
-function warn(...a) { console.warn("🟡", ...a); }
-function err(...a) { console.error("🔴", ...a); }
-
-
-// ======================================================
-// NUEVO TURNO
-// ======================================================
+// ============================
+// RESET CAMPOS
+// ============================
 function resetCampos() {
-    document.getElementById("obras").innerHTML = "";
-    document.getElementById("medico").innerHTML = "";
+    document.getElementById("obra-social-display").value = "";
+    document.getElementById("medico").innerHTML = '<option value="">-- Seleccione un paciente primero --</option>';
+    document.getElementById("notas").value = "";
 }
 
+// ============================
+// NUEVO TURNO
+// ============================
 function abrirNuevo() {
-    log("Abrir nuevo turno");
     document.getElementById("modalTitle").innerText = "Nuevo Turno";
     document.getElementById("form-id").value = "";
     document.getElementById("paciente").value = "";
     document.getElementById("fecha").value = "";
     document.getElementById("hora").value = "";
+
     resetCampos();
     modalForm.showModal();
 }
 
-
-// ======================================================
+// ============================
 // CAMBIO DE PACIENTE
-// ======================================================
+// ============================
 function onPacienteChange() {
-    const id = document.getElementById("paciente").value;
-    log("Paciente seleccionado:", id);
-    cargarObras();
-}
+    const sel = document.getElementById("paciente");
+    const idPaciente = parseInt(sel.value);
 
-
-// ======================================================
-// EDITAR
-// ======================================================
-function abrirEditar(t) {
-    log("Editar turno:", t);
-
-    document.getElementById("modalTitle").innerText = "Editar Turno";
-
-    document.getElementById("form-id").value = t.id;
-    document.getElementById("paciente").value = t.idPaciente;
-
-    resetCampos();
-
-    cargarObras().then(() => {
-
-        const obrasSelect = document.getElementById("obras");
-        t.obras.forEach(id => {
-            Array.from(obrasSelect.options).forEach(opt => {
-                if (opt.value == id) opt.selected = true;
-            });
-        });
-
-        cargarMedicos().then(() => {
-            document.getElementById("medico").value = t.idMedico;
-        });
-
-    });
-
-    document.getElementById("fecha").value = t.fecha;
-    document.getElementById("hora").value = t.hora;
-
-    modalForm.showModal();
-}
-
-
-// ======================================================
-// CARGAR OBRAS DEL PACIENTE
-// ======================================================
-async function cargarObras() {
-    const idPaciente = document.getElementById("paciente").value;
-    log("cargarObras(): idPaciente =", idPaciente);
-
-    const obrasSelect = document.getElementById("obras");
-    obrasSelect.innerHTML = "";
+    console.log("🟡 Paciente seleccionado:", idPaciente);
 
     if (!idPaciente) {
-        warn("No hay idPaciente -> no se consulta");
+        resetCampos();
         return;
     }
 
-    const url = `${baseUrl}/obras-sociales-paciente/${idPaciente}`;
-    log("URL OBRAS =", url);
+    // Buscar paciente en los datos cargados
+    const paciente = TODO_PACIENTES.find(p => p.id === idPaciente);
 
-    try {
-        const res = await fetch(url);
-        log("Status:", res.status);
-        log("Content-Type:", res.headers.get("content-type"));
-
-        const data = await res.json();
-        log("Obras recibidas:", data);
-
-        data.forEach(o => {
-            obrasSelect.innerHTML += `<option value="${o.id}">${o.nombre}</option>`;
-        });
-
-    } catch (e) {
-        err("Error cargando obras:", e);
+    if (!paciente) {
+        console.warn("⚠️ Paciente no encontrado");
+        resetCampos();
+        return;
     }
+
+    console.log("📦 Paciente encontrado:", paciente);
+
+    // Mostrar obra social del paciente
+    document.getElementById("obra-social-display").value = paciente.obraSocialNombre;
+
+    // Cargar médicos que acepten esa obra social
+    cargarMedicos(paciente.obraSocialId);
 }
 
-
-// ======================================================
-// CARGAR MÉDICOS SEGÚN OBRAS
-// ======================================================
-async function cargarMedicos() {
-    const obras = Array.from(document.getElementById("obras").selectedOptions)
-        .map(o => o.value);
-
-    log("cargarMedicos(): obras seleccionadas =", obras);
+// ============================
+// CARGAR MÉDICOS FILTRADOS
+// ============================
+function cargarMedicos(obraSocialId) {
+    console.log("🔵 Filtrando médicos por obra social ID:", obraSocialId);
 
     const medicoSelect = document.getElementById("medico");
+    
+    // IMPORTANTE: Limpiar completamente el select
     medicoSelect.innerHTML = "";
 
-    if (obras.length === 0) {
-        warn("No hay obras -> no se cargan médicos");
+    if (!obraSocialId) {
+        console.warn("⚠️ Sin obra social");
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "-- Sin obra social --";
+        medicoSelect.appendChild(opt);
         return;
     }
 
-    const params = new URLSearchParams();
-    obras.forEach(o => params.append("obras", o));
+    // Filtrar médicos que acepten la obra social del paciente
+    const medicosFiltrados = TODO_MEDICOS.filter(medico => {
+        return medico.obras.includes(parseInt(obraSocialId));
+    });
 
-    const url = `${baseUrl}/medicos-disponibles?${params.toString()}`;
-    log("URL MEDICOS =", url);
+    console.log("📦 Médicos filtrados:", medicosFiltrados);
 
-    try {
-        const res = await fetch(url);
-        log("Status:", res.status);
+    if (medicosFiltrados.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No hay médicos para esta obra social";
+        medicoSelect.appendChild(opt);
+        return;
+    }
 
-        const data = await res.json();
-        log("Médicos recibidos:", data);
+    // Agregar opción por defecto
+    const optDefault = document.createElement("option");
+    optDefault.value = "";
+    optDefault.textContent = "-- Seleccione un médico --";
+    medicoSelect.appendChild(optDefault);
 
-        data.forEach(m => {
-            medicoSelect.innerHTML += `<option value="${m.id}">
-                ${m.nombre} (${m.especialidad})
-            </option>`;
-        });
+    // Agregar cada médico filtrado
+    medicosFiltrados.forEach(medico => {
+        const opt = document.createElement("option");
+        opt.value = medico.id;
+        opt.textContent = medico.nombre + " (" + medico.especialidad + ")";
+        medicoSelect.appendChild(opt);
+    });
 
-    } catch (e) {
-        err("Error cargando médicos:", e);
+    console.log("✅ Select de médicos actualizado con", medicosFiltrados.length, "opciones");
+}
+
+// ============================
+// CONFIRMAR CANCELAR
+// ============================
+function confirmarCancelar(id) {
+    if (confirm("¿Cancelar turno?")) {
+        window.location.href = "${pageContext.request.contextPath}/turnos/cancelar/" + id;
     }
 }
 
+// ============================
+// EDITAR
+// ============================
+function abrirEditar(turno) {
+    console.log("✏ Editando turno:", turno);
 
-// ======================================================
-// EVENTO CLICK EDITAR
-// ======================================================
+    document.getElementById("modalTitle").innerText = "Editar Turno";
+    document.getElementById("form-id").value = turno.id;
+    document.getElementById("paciente").value = turno.pacienteId;
+    document.getElementById("fecha").value = turno.fecha;
+    document.getElementById("hora").value = turno.hora;
+    document.getElementById("notas").value = turno.notas || "";
+
+    // Cargar obra social del paciente y médicos
+    onPacienteChange();
+
+    // Seleccionar el médico correcto después de que se carguen
+    setTimeout(() => {
+        const medicoSelect = document.getElementById("medico");
+        medicoSelect.value = turno.medicoId;
+        console.log("✅ Médico seleccionado:", turno.medicoId);
+    }, 100);
+
+    modalForm.showModal();
+}
+
+// ============================
+// EVENTOS INICIALES
+// ============================
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".btn-editar").forEach(btn => {
+    console.log("🟩 DOMContentLoaded");
 
+    const btns = document.querySelectorAll(".btn-editar");
+    console.log("🔎 Botones editar encontrados:", btns.length);
+
+    btns.forEach(btn => {
         btn.addEventListener("click", () => {
-
-            log("Click en editar → dataset:", btn.dataset);
-
-            const obras = btn.dataset.obras
-                ? btn.dataset.obras.split(",").map(Number)
-                : [];
-
             const turno = {
-                id: btn.dataset.id,
-                idPaciente: btn.dataset.idpaciente,
-                idMedico: btn.dataset.idmedico,
-                fecha: btn.dataset.fecha,
-                hora: btn.dataset.hora,
-                obras: obras
+                id:            btn.dataset.id,
+                pacienteId:    parseInt(btn.dataset.pacienteid),
+                medicoId:      parseInt(btn.dataset.medicoid),
+                fecha:         btn.dataset.fecha,
+                hora:          btn.dataset.hora.substring(0, 5),
+                obraSocialId:  parseInt(btn.dataset.obrasocialid),
+                notas:         btn.dataset.notas || ""
             };
 
             abrirEditar(turno);
         });
     });
 });
-
 </script>
 
 </body>

@@ -46,7 +46,6 @@
             border-collapse: collapse;
             background:white;
             border-radius:6px;
-            overflow:hidden;
         }
         th, td {
             padding:10px;
@@ -112,9 +111,9 @@
         }
 
         // Confirmación antes de eliminar
-        function confirmarEliminar(url) {
-            if (confirm("¿Seguro que desea eliminar este registro?")) {
-                window.location.href = url;
+        function confirmarEliminar(id) {
+            if (confirm("¿Seguro que desea eliminar esta obra social?")) {
+                window.location.href = "${pageContext.request.contextPath}/obras-sociales/eliminar/" + id;
             }
         }
     </script>
@@ -130,13 +129,14 @@
     <a href="${pageContext.request.contextPath}/pacientes">🧑‍🤝‍🧑 Pacientes</a>
     <a class="active" href="${pageContext.request.contextPath}/obras-sociales">🏥 Obras Sociales</a>
     <a href="${pageContext.request.contextPath}/turnos">📅 Turnos</a>
+    <a href="${pageContext.request.contextPath}/reportes">📊 Reportes</a>
 </div>
 
 <!-- CONTENIDO -->
 <div class="content">
 
     <h2>Obras Sociales</h2>
-    <button class="btn btn-primary" onclick="abrirNuevo()">➕ Nueva</button>
+    <button class="btn btn-primary" onclick="abrirNuevo()">➕ Nueva Obra Social</button>
 
     <br><br>
 
@@ -144,23 +144,30 @@
         <tr>
             <th>ID</th>
             <th>Nombre</th>
-            <th>Activo</th>
-            <th style="width:180px;">Acciones</th>
+            <th>Estado</th>
+            <th>Acciones</th>
         </tr>
 
         <c:forEach var="o" items="${items}">
             <tr>
                 <td>${o.id}</td>
                 <td>${o.nombre}</td>
-                <td>${o.activo}</td>
+                <td>
+                    <c:choose>
+                        <c:when test="${o.activo}">
+                            <span style="color: green;">✓ Activo</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span style="color: red;">✗ Inactivo</span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
                 <td>
                     <button class="btn btn-primary"
                             onclick="abrirEditar('${o.id}','${o.nombre}')">✏ Editar</button>
 
                     <button class="btn btn-danger"
-                            onclick="confirmarEliminar('${pageContext.request.contextPath}/obras-sociales/eliminar/${o.id}')">
-                        🗑 Eliminar
-                    </button>
+                            onclick="confirmarEliminar('${o.id}')">🗑 Eliminar</button>
                 </td>
             </tr>
         </c:forEach>
@@ -172,9 +179,7 @@
 <dialog id="modalForm">
     <h3 id="modalTitle"></h3>
 
-    <form method="post"
-          action="${pageContext.request.contextPath}/obras-sociales/"
-          style="margin-top:10px;">
+    <form method="post" action="${pageContext.request.contextPath}/obras-sociales">
           
         <input type="hidden" id="form-action" name="action">
         <input type="hidden" id="form-id" name="id">

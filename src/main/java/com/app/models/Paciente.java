@@ -1,50 +1,52 @@
 package com.app.models;
 
-import java.util.List;
-
 public class Paciente {
 
     private int id;
-    private String nombreCompleto;
-    private String telefono;
+    private String nombre;
+    private String email;
+    private String numeroTelefono;
     private String documento;
+    private int obraSocialId;
+    private String obraSocialNombre;  // Para mostrar en vistas
     private boolean activo;
-
-    private List<Integer> obrasSocialesIds;
-    private List<ObraSocial> obrasSociales;   // NUEVO
-    private String obrasSocialesIdsCsv;       // NUEVO
 
     public Paciente() {}
 
-    public Paciente(int id, String nombreCompleto, String telefono, String documento, boolean activo) {
+    public Paciente(int id, String nombre, String email, String numeroTelefono, 
+                    String documento, int obraSocialId, boolean activo) {
         this.id = id;
-        this.nombreCompleto = nombreCompleto;
-        this.telefono = telefono;
+        this.nombre = nombre;
+        this.email = email;
+        this.numeroTelefono = numeroTelefono;
         this.documento = documento;
+        this.obraSocialId = obraSocialId;
         this.activo = activo;
     }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public String getNombreCompleto() { return nombreCompleto; }
-    public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getNumeroTelefono() { return numeroTelefono; }
+    public void setNumeroTelefono(String numeroTelefono) { this.numeroTelefono = numeroTelefono; }
 
     public String getDocumento() { return documento; }
     public void setDocumento(String documento) { this.documento = documento; }
 
+    public int getObraSocialId() { return obraSocialId; }
+    public void setObraSocialId(int obraSocialId) { this.obraSocialId = obraSocialId; }
+
+    public String getObraSocialNombre() { return obraSocialNombre; }
+    public void setObraSocialNombre(String obraSocialNombre) { 
+        this.obraSocialNombre = obraSocialNombre; 
+    }
+
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
-
-    public List<Integer> getObrasSocialesIds() { return obrasSocialesIds; }
-    public void setObrasSocialesIds(List<Integer> obrasSocialesIds) { this.obrasSocialesIds = obrasSocialesIds; }
-
-    public List<ObraSocial> getObrasSociales() { return obrasSociales; }
-    public void setObrasSociales(List<ObraSocial> obrasSociales) { this.obrasSociales = obrasSociales; }
-
-    public String getObrasSocialesIdsCsv() { return obrasSocialesIdsCsv; }
-    public void setObrasSocialesIdsCsv(String obrasSocialesIdsCsv) { this.obrasSocialesIdsCsv = obrasSocialesIdsCsv; }
 }

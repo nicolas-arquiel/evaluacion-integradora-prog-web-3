@@ -1,6 +1,7 @@
 package com.app.controllers;
 
 import com.app.models.Medico;
+import com.app.repositories.EspecialidadRepository;
 import com.app.repositories.MedicoRepository;
 import com.app.repositories.ObraSocialRepository;
 
@@ -22,6 +23,7 @@ public class MedicoController {
 
     private final MedicoRepository repo = new MedicoRepository();
     private final ObraSocialRepository repoObras = new ObraSocialRepository();
+    private final EspecialidadRepository repoEspecialidades = new EspecialidadRepository();
 
     @Inject
     Models models;
@@ -34,6 +36,7 @@ public class MedicoController {
     public void listar() {
         models.put("medicos", repo.listar());
         models.put("obrasSociales", repoObras.listar());
+        models.put("especialidades", repoEspecialidades.listar());
     }
 
     // ============================================
@@ -44,8 +47,8 @@ public class MedicoController {
     public String guardar(
             @FormParam("action") String action,
             @FormParam("id") Integer id,
-            @FormParam("nombreCompleto") String nombre,
-            @FormParam("especialidad") String especialidad,
+            @FormParam("nombre") String nombre,
+            @FormParam("especialidadId") int especialidadId,
             @FormParam("matricula") String matricula,
             @FormParam("obrasSocialesIds") List<Integer> obras
     ) {
@@ -54,8 +57,8 @@ public class MedicoController {
             if ("crear".equals(action)) {
 
                 Medico m = new Medico();
-                m.setNombreCompleto(nombre);
-                m.setEspecialidad(especialidad);
+                m.setNombre(nombre);
+                m.setEspecialidadId(especialidadId);
                 m.setMatricula(matricula);
                 m.setActivo(true);
                 m.setObrasSocialesIds(obras);
@@ -63,7 +66,7 @@ public class MedicoController {
 
             } else if ("actualizar".equals(action)) {
 
-                Medico m = new Medico(id, nombre, especialidad, matricula, true);
+                Medico m = new Medico(id, nombre, especialidadId, matricula, true);
                 m.setObrasSocialesIds(obras);
                 repo.actualizar(m);
             }
