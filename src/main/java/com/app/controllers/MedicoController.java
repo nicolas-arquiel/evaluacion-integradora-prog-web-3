@@ -15,6 +15,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RequestScoped
@@ -27,7 +28,7 @@ public class MedicoController {
     private final EspecialidadRepository repoEspecialidades = new EspecialidadRepository();
 
     @Inject
-    Models models;
+    private Models models;
 
     // ============================================
     // LISTAR (INDEX)
@@ -68,39 +69,89 @@ public class MedicoController {
             @FormParam("action") String action,
             @FormParam("id") Integer id,
             @FormParam("nombre") String nombre,
-            @FormParam("especialidadId") int especialidadId,
+            @FormParam("especialidadId") Integer especialidadId,
             @FormParam("matricula") String matricula,
             @FormParam("obrasSocialesIds") List<Integer> obras
     ) {
 
+        // ============================================
+        // VALIDACIONES OBLIGATORIAS
+        // ============================================
+        List<String> errores = new ArrayList<>();
+
+        // Validar nombre
+        if (nombre == null || nombre.trim().isEmpty()) {
+            errores.add("El nombre es obligatorio");
+        }
+
+        // Validar especialidad
+        if (especialidadId == null || especialidadId <= 0) {
+            errores.add("Debe seleccionar una especialidad");
+        }
+
+        // Validar matrícula
+        if (matricula == null || matricula.trim().isEmpty()) {
+            errores.add("La matrícula es obligatoria");
+        }
+
+        // Validar obras sociales
+        if (obras == null || obras.isEmpty()) {
+            errores.add("Debe seleccionar al menos una obra social");
+        }
+
+        // Si hay errores, mostrar mensaje de validación
+        if (!errores.isEmpty()) {
+            String mensajeError = "Faltan completar los siguientes datos: " + String.join(", ", errores);
+            return AlertUtils.redirectWithError("/medicos", mensajeError);
+        }
+
         try {
             if ("crear".equals(action)) {
+                // Validación adicional para crear: verificar que no exista la matrícula
+                if (repo.existeMatricula(matricula.trim())) {
+                    return AlertUtils.redirectWithError("/medicos", 
+                        "Ya existe un médico con la matrícula " + matricula.trim());
+                }
 
                 Medico m = new Medico();
-                m.setNombre(nombre);
+                m.setNombre(nombre.trim());
                 m.setEspecialidadId(especialidadId);
-                m.setMatricula(matricula);
+                m.setMatricula(matricula.trim());
                 m.setActivo(true);
                 m.setObrasSocialesIds(obras);
-                repo.insertar(m);
                 
+                repo.insertar(m);
                 return AlertUtils.redirectWithSuccess("/medicos", 
-                    "Médico " + nombre + " creado exitosamente");
+                    "Médico " + nombre.trim() + " creado exitosamente con matrícula " + matricula.trim());
 
             } else if ("actualizar".equals(action)) {
+                // Validación adicional para actualizar: verificar que el ID exista
+                if (id == null || id <= 0) {
+                    return AlertUtils.redirectWithError("/medicos", "ID de médico inválido");
+                }
 
-                Medico m = new Medico(id, nombre, especialidadId, matricula, true);
+                // Verificar que no exista otra matrícula igual (excepto el mismo médico)
+                if (repo.existeMatriculaOtroMedico(matricula.trim(), id)) {
+                    return AlertUtils.redirectWithError("/medicos", 
+                        "Ya existe otro médico con la matrícula " + matricula.trim());
+                }
+
+                Medico m = new Medico(id, nombre.trim(), especialidadId, matricula.trim(), true);
                 m.setObrasSocialesIds(obras);
-                repo.actualizar(m);
                 
+                repo.actualizar(m);
                 return AlertUtils.redirectWithSuccess("/medicos", 
-                    "Médico " + nombre + " actualizado exitosamente");
+                    "Médico " + nombre.trim() + " actualizado exitosamente");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
             return AlertUtils.redirectWithError("/medicos", 
                 "Error al guardar el médico: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AlertUtils.redirectWithError("/medicos", 
+                "Error inesperado: " + e.getMessage());
         }
 
         return AlertUtils.redirectWithInfo("/medicos", "Operación completada");
@@ -113,21 +164,23 @@ public class MedicoController {
     @Path("/eliminar/{id}")
     public String eliminar(@PathParam("id") int id) {
         try {
+            // Validar que el ID sea válido
+            if (id <= 0) {
+                return AlertUtils.redirectWithError("/medicos", "ID de médico inválido");
+            }
+
             // Obtener datos del médico antes de eliminar
-            List<Medico> medicos = repo.listar();
-            Medico medico = medicos.stream()
-                                  .filter(m -> m.getId() == id)
-                                  .findFirst()
-                                  .orElse(null);
+            Medico medico = repo.obtenerPorId(id);
             
+            if (medico == null) {
+                return AlertUtils.redirectWithWarning("/medicos", 
+                    "El médico que intenta eliminar ya no existe");
+            }
+
             repo.eliminar(id);
             
-            String mensaje = "Médico eliminado exitosamente";
-            if (medico != null) {
-                mensaje = "Médico " + medico.getNombre() + " eliminado exitosamente";
-            }
-            
-            return AlertUtils.redirectWithSuccess("/medicos", mensaje);
+            return AlertUtils.redirectWithSuccess("/medicos", 
+                "Médico " + medico.getNombre() + " (Matrícula: " + medico.getMatricula() + ") eliminado exitosamente");
             
         } catch (Exception e) {
             e.printStackTrace();

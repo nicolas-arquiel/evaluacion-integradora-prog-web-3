@@ -15,7 +15,6 @@
 
 <!-- CONTENIDO -->
 <div class="content">
-
     <h2><i class="fas fa-user-md"></i> Médicos</h2>
     <button class="btn btn-primary" onclick="abrirNuevo()">
         <i class="fas fa-plus"></i> Nuevo Médico
@@ -65,25 +64,18 @@
     </table>
 </div>
 
-<!-- MODAL MEJORADO -->
+<!-- MODAL -->
 <dialog id="modalForm">
     <h3 id="modalTitle"></h3>
-
-    <form method="post" action="/app/medicos">
-
+    
+    <form method="post" action="${pageContext.request.contextPath}/app/medicos">
         <input type="hidden" name="action" id="form-action">
         <input type="hidden" name="id" id="form-id">
 
-        <div class="input-label">
-            <i class="fas fa-user"></i>
-            <span>Nombre:</span>
-        </div>
+        <label><i class="fas fa-user"></i> Nombre:</label>
         <input type="text" id="form-nombre" name="nombre" required>
 
-        <div class="input-label">
-            <i class="fas fa-stethoscope"></i>
-            <span>Especialidad:</span>
-        </div>
+        <label><i class="fas fa-stethoscope"></i> Especialidad:</label>
         <select id="form-especialidad" name="especialidadId" required>
             <option value="">-- Seleccione --</option>
             <c:forEach var="e" items="${especialidades}">
@@ -91,17 +83,10 @@
             </c:forEach>
         </select>
 
-        <div class="input-label">
-            <i class="fas fa-id-badge"></i>
-            <span>Matrícula:</span>
-        </div>
+        <label><i class="fas fa-id-badge"></i> Matrícula:</label>
         <input type="text" id="form-matricula" name="matricula" required>
 
-        <div class="input-label">
-            <i class="fas fa-hospital"></i>
-            <span>Obras Sociales:</span>
-        </div>
-        
+        <label><i class="fas fa-hospital"></i> Obras Sociales:</label>
         <div class="obras-sociales-container">
             <c:forEach var="o" items="${obrasSociales}">
                 <div class="obra-social-item">
@@ -111,15 +96,13 @@
             </c:forEach>
         </div>
 
-        <div class="modal-buttons">
-            <button type="button" class="btn" onclick="modalForm.close()">
-                <i class="fas fa-times"></i> Cancelar
-            </button>
-            <button class="btn btn-primary" type="submit">
-                <i class="fas fa-save"></i> Guardar
-            </button>
-        </div>
-
+        <br>
+        <button class="btn btn-primary" type="submit">
+            <i class="fas fa-save"></i> Guardar
+        </button>
+        <button type="button" class="btn" onclick="modalForm.close()">
+            <i class="fas fa-times"></i> Cancelar
+        </button>
     </form>
 </dialog>
 

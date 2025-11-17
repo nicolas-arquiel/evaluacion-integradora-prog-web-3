@@ -6,6 +6,10 @@
     <title>Reportes y Estadísticas - Salud Total</title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/reportes.css">
+
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
     <script src="/js/reportes.js"></script>
 
 </head>
@@ -14,84 +18,77 @@
 <!-- SIDEBAR -->
 <jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
-
 <!-- CONTENIDO -->
 <div class="content">
 
-    <h1>📊 Reportes y Estadísticas</h1>
-    <p style="color: #666; margin-bottom: 30px;">Seleccione un tipo de reporte para ver las estadísticas detalladas</p>
+    <h1><i class="fas fa-chart-bar"></i> Reportes y Estadísticas</h1>
+    <p style="color: #666; margin-bottom: 30px;">Seleccione un tipo de reporte para ver la información</p>
 
     <!-- CARDS DE REPORTES -->
     <div class="report-cards">
+
         <div class="report-card" onclick="mostrarReporte('turnos-medico')" id="card-turnos-medico">
-            <div class="icon">👨‍⚕️</div>
+            <div class="icon"><i class="fas fa-user-md"></i></div>
             <h3>Turnos por Médico</h3>
-            <p>Cantidad de turnos atendidos por cada médico</p>
+            <p>Cantidad de turnos atendidos por médico</p>
         </div>
 
         <div class="report-card" onclick="mostrarReporte('turnos-especialidad')" id="card-turnos-especialidad">
-            <div class="icon">🏥</div>
+            <div class="icon"><i class="fas fa-stethoscope"></i></div>
             <h3>Turnos por Especialidad</h3>
-            <p>Distribución de turnos según especialidad médica</p>
+            <p>Distribución por especialidad médica</p>
         </div>
 
         <div class="report-card" onclick="mostrarReporte('turnos-obra-social')" id="card-turnos-obra-social">
-            <div class="icon">💳</div>
+            <div class="icon"><i class="fas fa-id-card"></i></div>
             <h3>Turnos por Obra Social</h3>
-            <p>Cantidad de turnos según obra social del paciente</p>
+            <p>Cantidad de turnos según obra social</p>
         </div>
 
         <div class="report-card" onclick="mostrarReporte('estados-turnos')" id="card-estados-turnos">
-            <div class="icon">📈</div>
+            <div class="icon"><i class="fas fa-list-check"></i></div>
             <h3>Estados de Turnos</h3>
-            <p>Estadísticas de turnos programados, completados y cancelados</p>
+            <p>Programados, completados y cancelados</p>
         </div>
 
         <div class="report-card" onclick="mostrarReporte('turnos-mes')" id="card-turnos-mes">
-            <div class="icon">📅</div>
+            <div class="icon"><i class="fas fa-calendar-alt"></i></div>
             <h3>Turnos por Mes</h3>
-            <p>Evolución mensual de la cantidad de turnos</p>
+            <p>Evolución mensual</p>
         </div>
 
         <div class="report-card" onclick="mostrarReporte('medicos-obras')" id="card-medicos-obras">
-            <div class="icon">🔗</div>
+            <div class="icon"><i class="fas fa-link"></i></div>
             <h3>Médicos y Obras Sociales</h3>
-            <p>Relación entre médicos y obras sociales aceptadas</p>
+            <p>Relación médico – cobertura</p>
         </div>
+
     </div>
+
 
     <!-- ESTADO INICIAL -->
     <div class="report-section active" id="report-inicial">
         <div class="empty-state">
-            <div class="icon">📊</div>
+            <div class="icon"><i class="fas fa-chart-bar"></i></div>
             <h3>Seleccione un reporte</h3>
-            <p>Haga clic en una de las tarjetas superiores para ver las estadísticas</p>
+            <p>Haga clic en una tarjeta para ver los datos</p>
         </div>
     </div>
 
-    <!-- REPORTE: TURNOS POR MÉDICO -->
-    <div class="report-section" id="report-turnos-medico">
-        <h2>👨‍⚕️ Turnos por Médico</h2>
-        
-        <div class="stats-grid">
-            <div class="stat-box">
-                <h4>Total de Médicos</h4>
-                <div class="value">${totalMedicos}</div>
-            </div>
-            <div class="stat-box">
-                <h4>Promedio Turnos/Médico</h4>
-                <div class="value">${promedioTurnosMedico}</div>
-            </div>
-        </div>
 
+    <!-- ===================================================== -->
+    <!-- REPORTE: TURNOS POR MÉDICO -->
+    <!-- ===================================================== -->
+    <div class="report-section" id="report-turnos-medico">
+        <h2><i class="fas fa-user-md"></i> Turnos por Médico</h2>
         <table>
             <thead>
                 <tr>
                     <th>Médico</th>
                     <th>Especialidad</th>
-                    <th>Turnos Programados</th>
-                    <th>Turnos Completados</th>
-                    <th>Turnos Cancelados</th>
+                    <th>Programados</th>
+                    <th>Completados</th>
+                    <th>Cancelados</th>
                     <th>Total</th>
                 </tr>
             </thead>
@@ -110,16 +107,19 @@
         </table>
     </div>
 
+
+    <!-- ===================================================== -->
     <!-- REPORTE: TURNOS POR ESPECIALIDAD -->
+    <!-- ===================================================== -->
     <div class="report-section" id="report-turnos-especialidad">
-        <h2>🏥 Turnos por Especialidad</h2>
+        <h2><i class="fas fa-stethoscope"></i> Turnos por Especialidad</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>Especialidad</th>
-                    <th>Cantidad de Turnos</th>
-                    <th>Porcentaje</th>
+                    <th>Cantidad</th>
+                    <th>%</th>
                 </tr>
             </thead>
             <tbody>
@@ -134,17 +134,20 @@
         </table>
     </div>
 
+
+    <!-- ===================================================== -->
     <!-- REPORTE: TURNOS POR OBRA SOCIAL -->
+    <!-- ===================================================== -->
     <div class="report-section" id="report-turnos-obra-social">
-        <h2>💳 Turnos por Obra Social</h2>
+        <h2><i class="fas fa-id-card"></i> Turnos por Obra Social</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>Obra Social</th>
-                    <th>Cantidad de Pacientes</th>
-                    <th>Cantidad de Turnos</th>
-                    <th>Promedio Turnos/Paciente</th>
+                    <th>Pacientes</th>
+                    <th>Turnos</th>
+                    <th>Promedio</th>
                 </tr>
             </thead>
             <tbody>
@@ -160,35 +163,19 @@
         </table>
     </div>
 
-    <!-- REPORTE: ESTADOS DE TURNOS -->
-    <div class="report-section" id="report-estados-turnos">
-        <h2>📈 Estados de Turnos</h2>
 
-        <div class="stats-grid">
-            <div class="stat-box" style="border-left-color: #2e8bff;">
-                <h4>Programados</h4>
-                <div class="value" style="color: #2e8bff;">${estadosProgramados}</div>
-            </div>
-            <div class="stat-box" style="border-left-color: #4caf50;">
-                <h4>Completados</h4>
-                <div class="value" style="color: #4caf50;">${estadosCompletados}</div>
-            </div>
-            <div class="stat-box" style="border-left-color: #d32f2f;">
-                <h4>Cancelados</h4>
-                <div class="value" style="color: #d32f2f;">${estadosCancelados}</div>
-            </div>
-            <div class="stat-box" style="border-left-color: #666;">
-                <h4>Total</h4>
-                <div class="value">${estadosTotal}</div>
-            </div>
-        </div>
+    <!-- ===================================================== -->
+    <!-- REPORTE: ESTADOS DE TURNOS -->
+    <!-- ===================================================== -->
+    <div class="report-section" id="report-estados-turnos">
+        <h2><i class="fas fa-list-check"></i> Estados de Turnos</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>Estado</th>
                     <th>Cantidad</th>
-                    <th>Porcentaje</th>
+                    <th>%</th>
                 </tr>
             </thead>
             <tbody>
@@ -203,9 +190,12 @@
         </table>
     </div>
 
+
+    <!-- ===================================================== -->
     <!-- REPORTE: TURNOS POR MES -->
+    <!-- ===================================================== -->
     <div class="report-section" id="report-turnos-mes">
-        <h2>📅 Turnos por Mes</h2>
+        <h2><i class="fas fa-calendar-alt"></i> Turnos por Mes</h2>
 
         <table>
             <thead>
@@ -233,16 +223,19 @@
         </table>
     </div>
 
+
+    <!-- ===================================================== -->
     <!-- REPORTE: MÉDICOS Y OBRAS SOCIALES -->
+    <!-- ===================================================== -->
     <div class="report-section" id="report-medicos-obras">
-        <h2>🔗 Médicos y Obras Sociales</h2>
+        <h2><i class="fas fa-link"></i> Médicos y Obras Sociales</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>Médico</th>
                     <th>Especialidad</th>
-                    <th>Obras Sociales Aceptadas</th>
+                    <th>Obras Sociales</th>
                     <th>Cantidad</th>
                 </tr>
             </thead>

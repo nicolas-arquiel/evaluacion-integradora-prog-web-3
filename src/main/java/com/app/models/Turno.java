@@ -11,17 +11,15 @@ public class Turno {
     private Time hora;
     private int estadoId;
     private String notas;
-    private boolean activo;
 
     // Para mostrar en vistas
     private String estadoNombre;
     private String nombrePaciente;
     private String nombreMedico;
-    private int obraSocialId;  // Obra social del paciente
+    private int obraSocialId;
 
     public Turno() {}
 
-    // Getters y setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -42,9 +40,6 @@ public class Turno {
 
     public String getNotas() { return notas; }
     public void setNotas(String notas) { this.notas = notas; }
-
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
 
     public String getEstadoNombre() { return estadoNombre; }
     public void setEstadoNombre(String estadoNombre) { this.estadoNombre = estadoNombre; }

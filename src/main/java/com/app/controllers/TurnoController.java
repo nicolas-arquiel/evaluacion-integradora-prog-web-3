@@ -50,15 +50,12 @@ public class TurnoController {
             @QueryParam("warning") String warning,
             @QueryParam("info") String info
     ) {
-        // Cargar TODOS los médicos con sus obras sociales
         List<Medico> todosMedicos = repoMedicos.listar();
         models.put("medicos", todosMedicos);
 
-        // Cargar TODOS los pacientes (cada uno con su obra social)
         List<Paciente> todosPacientes = repoPacientes.listar();
         models.put("pacientes", todosPacientes);
 
-        // Filtrar turnos si hay criterios
         List<Turno> lista;
         boolean filtraFechas = (desde != null && !desde.isEmpty()) ||
                                (hasta != null && !hasta.isEmpty());
@@ -70,20 +67,11 @@ public class TurnoController {
         }
 
         models.put("turnos", lista);
-        
-        // Pasar mensajes desde parámetros URL
-        if (success != null && !success.isEmpty()) {
-            models.put("success", success);
-        }
-        if (error != null && !error.isEmpty()) {
-            models.put("error", error);
-        }
-        if (warning != null && !warning.isEmpty()) {
-            models.put("warning", warning);
-        }
-        if (info != null && !info.isEmpty()) {
-            models.put("info", info);
-        }
+
+        if (success != null && !success.isEmpty()) models.put("success", success);
+        if (error != null && !error.isEmpty()) models.put("error", error);
+        if (warning != null && !warning.isEmpty()) models.put("warning", warning);
+        if (info != null && !info.isEmpty()) models.put("info", info);
     }
 
     // ==========================================
@@ -97,158 +85,142 @@ public class TurnoController {
             @FormParam("medicoId") int medicoId,
             @FormParam("fecha") String fecha,
             @FormParam("hora") String hora,
-            @FormParam("notas") String notas
+            @FormParam("notas") String notas,
+
+            // ★ AGREGADO: Se permite recibir estadoId (si viene)
+            @FormParam("estadoId") Integer estadoId
     ) {
         try {
-            // ========================================
-            // VALIDACIONES DE ENTRADA
-            // ========================================
-            
-            // Validar fecha no vacía
+            // ===============================
+            // VALIDACIONES ORIGINALES
+            // ===============================
+
             if (fecha == null || fecha.trim().isEmpty()) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "Debe seleccionar una fecha para el turno");
+                return AlertUtils.redirectWithError("/turnos", "Debe seleccionar una fecha para el turno");
             }
-            
-            // Validar hora no vacía
             if (hora == null || hora.trim().isEmpty()) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "Debe seleccionar una hora para el turno");
+                return AlertUtils.redirectWithError("/turnos", "Debe seleccionar una hora para el turno");
             }
-            
+
             LocalDate fechaTurno = LocalDate.parse(fecha);
             LocalTime horaTurno = LocalTime.parse(hora);
             LocalDate hoy = LocalDate.now();
             LocalTime horaActual = LocalTime.now();
-            
-            // VALIDACIÓN: No permitir turnos en el pasado
+
             if (fechaTurno.isBefore(hoy)) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "No es posible agendar turnos en fechas pasadas");
+                return AlertUtils.redirectWithError("/turnos", "No es posible agendar turnos en fechas pasadas");
             }
-            
-            // VALIDACIÓN: Si es hoy, no permitir horas pasadas
+
             if (fechaTurno.equals(hoy) && horaTurno.isBefore(horaActual)) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "No es posible agendar turnos en horas pasadas");
+                return AlertUtils.redirectWithError("/turnos", "No es posible agendar turnos en horas pasadas");
             }
-            
-            // VALIDACIÓN: Horario laboral (8:00 a 17:45) - Último turno
+
             if (horaTurno.isBefore(LocalTime.of(8, 0)) || horaTurno.isAfter(LocalTime.of(17, 45))) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "Los turnos deben estar dentro del horario de atención (8:00 a 17:45 hs)");
+                return AlertUtils.redirectWithError("/turnos",
+                        "Los turnos deben estar dentro del horario de atención (8:00 a 17:45 hs)");
             }
 
-            // VALIDACIÓN: PROHIBIR fines de semana completamente
-            if (fechaTurno.getDayOfWeek().getValue() >= 6) { // 6=Sábado, 7=Domingo
-                return AlertUtils.redirectWithError("/turnos", 
-                    "La clínica no atiende los fines de semana. Seleccione un día de lunes a viernes");
+            if (fechaTurno.getDayOfWeek().getValue() >= 6) {
+                return AlertUtils.redirectWithError("/turnos",
+                        "La clínica no atiende los fines de semana. Seleccione un día de lunes a viernes");
             }
 
-            // Si es hoy, verificar que no sea muy tarde
             if (fechaTurno.equals(hoy)) {
-                LocalTime limite = LocalTime.of(16, 45); // 1 hora antes del último turno
-                
+                LocalTime limite = LocalTime.of(16, 45);
                 if (horaActual.isAfter(limite)) {
-                    return AlertUtils.redirectWithError("/turnos", 
-                        "No es posible agendar más turnos para hoy. Último turno disponible: 17:45 hs");
+                    return AlertUtils.redirectWithError("/turnos",
+                            "No es posible agendar más turnos para hoy. Último turno disponible: 17:45 hs");
                 }
 
-                LocalTime horaMinima = horaActual.plusHours(1); // Mínimo 1 hora de anticipación
+                LocalTime horaMinima = horaActual.plusHours(1);
                 if (horaTurno.isBefore(horaMinima)) {
-                    return AlertUtils.redirectWithError("/turnos", 
-                        "Los turnos para el día actual requieren al menos 1 hora de anticipación. " +
-                        "Próximo horario disponible: " + horaMinima.toString().substring(0, 5));
+                    return AlertUtils.redirectWithError("/turnos",
+                            "Los turnos para el día actual requieren al menos 1 hora de anticipación. " +
+                            "Próximo horario disponible: " + horaMinima.toString().substring(0, 5));
                 }
             }
-            
-            // Verificar que paciente y médico existen
+
             Paciente paciente = repoPacientes.obtenerPorId(pacienteId);
             if (paciente == null) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "El paciente seleccionado no está registrado en el sistema");
-            }
-            
-            // Obtener médico para verificar obra social
-            List<Medico> medicos = repoMedicos.listar();
-            Medico medico = medicos.stream()
-                                  .filter(m -> m.getId() == medicoId)
-                                  .findFirst()
-                                  .orElse(null);
-            
-            if (medico == null) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "El médico seleccionado no está registrado en el sistema");
-            }
-            
-            // VALIDACIÓN: Verificar que el médico trabaja con la obra social del paciente
-            boolean medicoTieneObraSocial = medico.getObrasSocialesIds()
-                                                  .contains(paciente.getObraSocialId());
-            
-            if (!medicoTieneObraSocial) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "Dr. " + medico.getNombre() + " no atiende pacientes de " + paciente.getObraSocialNombre() + 
-                    ". Verifique la cobertura médica");
+                return AlertUtils.redirectWithError("/turnos",
+                        "El paciente seleccionado no está registrado en el sistema");
             }
 
-            // Crear objeto turno
+            List<Medico> medicos = repoMedicos.listar();
+            Medico medico = medicos.stream()
+                    .filter(m -> m.getId() == medicoId)
+                    .findFirst()
+                    .orElse(null);
+
+            if (medico == null) {
+                return AlertUtils.redirectWithError("/turnos",
+                        "El médico seleccionado no está registrado en el sistema");
+            }
+
+            boolean medicoTieneObraSocial = medico.getObrasSocialesIds()
+                    .contains(paciente.getObraSocialId());
+
+            if (!medicoTieneObraSocial) {
+                return AlertUtils.redirectWithError("/turnos",
+                        medico.getNombre() + " no atiende pacientes de " + paciente.getObraSocialNombre() +
+                                ". Verifique la cobertura médica");
+            }
+
+            // ===============================
+            // CREAR OBJETO TURNO
+            // ===============================
             Turno t = new Turno();
             t.setPacienteId(pacienteId);
             t.setMedicoId(medicoId);
             t.setFecha(Date.valueOf(fecha));
             t.setHora(Time.valueOf(hora + ":00"));
-            t.setEstadoId(1); // programado
             t.setNotas(notas);
-            t.setActivo(true);
-
+            t.setEstadoId(estadoId != null ? estadoId : 1);
+            // ===============================
+            // LOGICA ORIGINAL DE CREAR / EDITAR
+            // ===============================
             if (id == null || id == 0) {
-                // CREAR NUEVO TURNO
                 repo.insertar(t);
-                return AlertUtils.redirectWithSuccess("/turnos", 
-                    "Turno registrado exitosamente - Paciente: " + paciente.getNombre() + 
-                    " - Médico: Dr. " + medico.getNombre() + " - " + fecha + " " + hora + " hs");
+                return AlertUtils.redirectWithSuccess("/turnos",
+                        "Turno registrado exitosamente - Paciente: " + paciente.getNombre() +
+                                " - Médico: " + medico.getNombre() + " - " + fecha + " " + hora + " hs");
 
             } else {
-                // ACTUALIZAR TURNO EXISTENTE
-                
-                // Verificar que el turno existe
                 Turno turnoExistente = repo.buscarPorId(id);
                 if (turnoExistente == null) {
-                    return AlertUtils.redirectWithError("/turnos", 
-                        "El turno seleccionado no existe o fue eliminado");
+                    return AlertUtils.redirectWithError("/turnos",
+                            "El turno seleccionado no existe o fue eliminado");
                 }
-                
-                // VALIDACIÓN: No permitir modificar turnos pasados
+
                 LocalDate fechaExistente = turnoExistente.getFecha().toLocalDate();
                 if (fechaExistente.isBefore(hoy)) {
-                    return AlertUtils.redirectWithError("/turnos", 
-                        "No es posible modificar turnos de fechas pasadas");
+                    return AlertUtils.redirectWithError("/turnos",
+                            "No es posible modificar turnos de fechas pasadas");
                 }
-                
+
                 t.setId(id);
                 repo.actualizar(t);
-                return AlertUtils.redirectWithSuccess("/turnos", 
-                    "Turno actualizado exitosamente - Paciente: " + paciente.getNombre() + 
-                    " - Médico: Dr. " + medico.getNombre() + " - " + fecha + " " + hora + " hs");
+
+                return AlertUtils.redirectWithSuccess("/turnos",
+                        "Turno actualizado exitosamente - Paciente: " + paciente.getNombre() +
+                                " - Médico: " + medico.getNombre() + " - " + fecha + " " + hora + " hs");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            
-            // Manejo específico de errores de duplicados
+
             if (e.getMessage().contains("Ya existe un turno")) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "Conflicto de agenda: Dr. ya tiene un turno asignado en ese horario. " +
-                    "Seleccione otro horario disponible");
+                return AlertUtils.redirectWithError("/turnos",
+                        "Conflicto de agenda: Dr. ya tiene un turno asignado en ese horario. Seleccione otro horario disponible");
             }
-            
-            return AlertUtils.redirectWithError("/turnos", 
-                "Error del sistema al guardar el turno: " + e.getMessage());
-                
+
+            return AlertUtils.redirectWithError("/turnos",
+                    "Error del sistema al guardar el turno: " + e.getMessage());
+
         } catch (Exception e) {
             e.printStackTrace();
-            return AlertUtils.redirectWithError("/turnos", 
-                "Error inesperado del sistema: " + e.getMessage());
+            return AlertUtils.redirectWithError("/turnos",
+                    "Error inesperado del sistema: " + e.getMessage());
         }
     }
 
@@ -259,42 +231,69 @@ public class TurnoController {
     @Path("/cancelar/{id}")
     public String cancelar(@PathParam("id") int id) {
         try {
-            // Verificar que el turno existe
             Turno turno = repo.buscarPorId(id);
             if (turno == null) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "El turno seleccionado no existe o ya fue eliminado");
+                return AlertUtils.redirectWithError("/turnos",
+                        "El turno seleccionado no existe o ya fue eliminado");
             }
-            
-            // VALIDACIÓN: No permitir cancelar turnos muy próximos (menos de 2 horas)
+
             LocalDate fechaTurno = turno.getFecha().toLocalDate();
             LocalTime horaTurno = turno.getHora().toLocalTime();
             LocalDate hoy = LocalDate.now();
             LocalTime horaActual = LocalTime.now();
-            
+
+            // ✔ NO permitir cancelar un turno COMPLETADO
+            if (turno.getEstadoId() == 3) {
+                return AlertUtils.redirectWithError("/turnos",
+                        "No es posible cancelar un turno que ya fue COMPLETADO.");
+            }
+
+            // ✔ Mantener tu regla original: si el turno es HOY y faltan < 2 horas → no permitir
             if (fechaTurno.equals(hoy) && horaTurno.minusHours(2).isBefore(horaActual)) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "Política de cancelación: No se pueden cancelar turnos con menos de 2 horas de anticipación. " +
-                    "El turno debe ser marcado como 'No asistió' en el sistema");
+                return AlertUtils.redirectWithError("/turnos",
+                        "Política de cancelación: No se pueden cancelar turnos con menos de 2 horas de anticipación.");
             }
-            
-            // VALIDACIÓN: No permitir cancelar turnos ya pasados
-            if (fechaTurno.isBefore(hoy) || 
-                (fechaTurno.equals(hoy) && horaTurno.isBefore(horaActual))) {
-                return AlertUtils.redirectWithError("/turnos", 
-                    "No es posible cancelar turnos que ya transcurrieron. " +
-                    "Use la opción 'Marcar como No Asistió' si corresponde");
-            }
-            
+
+            // ✔ Permitir cancelar turnos pasados
             repo.cancelar(id);
-            return AlertUtils.redirectWithSuccess("/turnos", 
-                "Turno cancelado exitosamente - Paciente: " + turno.getNombrePaciente() + 
-                " - Médico: Dr. " + turno.getNombreMedico() + ". Horario liberado en agenda");
-                
+
+            return AlertUtils.redirectWithSuccess("/turnos",
+                    "Turno cancelado exitosamente - Paciente: " + turno.getNombrePaciente() +
+                            " - Médico: " + turno.getNombreMedico());
+
         } catch (Exception e) {
             e.printStackTrace();
-            return AlertUtils.redirectWithError("/turnos", 
-                "Error del sistema al cancelar el turno: " + e.getMessage());
+            return AlertUtils.redirectWithError("/turnos",
+                    "Error del sistema al cancelar el turno: " + e.getMessage());
+        }
+    }
+
+
+    // ==========================================
+    // ★ AGREGADO — COMPLETAR TURNO
+    // ==========================================
+    @GET
+    @Path("/completar/{id}")
+    public String completar(@PathParam("id") int id) {
+        try {
+            Turno turno = repo.buscarPorId(id);
+            if (turno == null) {
+                return AlertUtils.redirectWithError("/turnos", "El turno no existe");
+            }
+
+            // no se tocan tus reglas de cancelación
+            // solo se marca estado = 3
+
+            turno.setEstadoId(3);  // completado
+
+            repo.actualizar(turno);
+
+            return AlertUtils.redirectWithSuccess("/turnos",
+                    "Turno marcado como COMPLETADO correctamente");
+
+        } catch (Exception e) {
+            return AlertUtils.redirectWithError("/turnos",
+                    "No se pudo completar el turno: " + e.getMessage());
         }
     }
 }

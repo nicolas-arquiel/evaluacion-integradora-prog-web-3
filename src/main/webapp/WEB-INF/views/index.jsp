@@ -3,119 +3,68 @@
 
 <html>
 <head>
-    <title>Sistema de Turnos Médicos - Salud Total</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Sistema de Turnos Médicos - Inicio</title>
+
+    <jsp:include page="/WEB-INF/includes/header.jsp" />
     <link rel="stylesheet" href="/css/home.css">
-
-    <style>
-        /* === ESTILOS ESPECÍFICOS DEL INDEX === */
-        .turnos-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .turno-card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-        }
-
-        .turno-card h3 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
-        }
-
-        .turno-card small {
-            color: #555;
-        }
-
-        /* ESTADOS */
-        .estado {
-            padding: 5px 8px;
-            border-radius: 5px;
-            font-size: 13px;
-            font-weight: bold;
-            display: inline-block;
-        }
-
-        .estado-programado {
-            background: #2e8bff;
-            color: white;
-        }
-
-        .estado-completado {
-            background: #4caf50;
-            color: white;
-        }
-
-        .estado-cancelado {
-            background: #d32f2f;
-            color: white;
-        }
-    </style>
 </head>
 
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-    <h2>Salud Total</h2>
-    <a class="active" href="/app/">🏠 Inicio</a>
-    <a href="/app/medicos">👨‍⚕️ Médicos</a>
-    <a href="/app/pacientes">🧑‍🤝‍🧑 Pacientes</a>
-    <a href="/app/obras-sociales">🏥 Obras Sociales</a>
-    <a href="/app/turnos">📅 Turnos</a>
-    <a href="/app/reportes">📊 Reportes</a>
-</div>
+<jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
-<!-- CONTENIDO PRINCIPAL -->
+<!-- CONTENIDO -->
 <div class="content">
 
-    <h1>Bienvenido al Sistema de Turnos Médicos</h1>
-    <p>Seleccione una opción del menú para comenzar.</p>
+    <h1>Bienvenido/a al Sistema de Turnos Médicos</h1>
 
-    <h2>Próximos Turnos</h2>
+    <p class="intro-text">
+        Desde este panel podés ver un resumen rápido de los turnos próximos.
+    </p>
+
+    <h2 class="titulo-seccion">
+        Próximos turnos
+    </h2>
 
     <c:choose>
+
         <c:when test="${empty turnos}">
-            <div class="empty-state">
-                <div class="icon">📅</div>
-                <h3>No hay turnos programados</h3>
-                <p>Comience creando un nuevo turno desde el módulo de Turnos</p>
-            </div>
+            <p class="sin-turnos">No hay turnos próximos.</p>
         </c:when>
+
         <c:otherwise>
+
             <div class="turnos-container">
+
                 <c:forEach var="t" items="${turnos}">
                     <div class="turno-card">
-                        <h3>${t.nombrePaciente}</h3>
-                        <small>👨‍⚕️ ${t.nombreMedico}</small><br>
-                        <small>📅 ${t.fecha} — 🕒 ${t.hora}</small>
 
-                        <br><br>
+                        <h3 class="turno-paciente">
+                            <i class="fas fa-user"></i> ${t.nombrePaciente}
+                        </h3>
 
-                        <!-- BADGE DEL ESTADO -->
-                        <c:choose>
-                            <c:when test="${t.estadoNombre == 'programado'}">
-                                <span class="estado estado-programado">Programado</span>
-                            </c:when>
-                            <c:when test="${t.estadoNombre == 'completado'}">
-                                <span class="estado estado-completado">Completado</span>
-                            </c:when>
-                            <c:when test="${t.estadoNombre == 'cancelado'}">
-                                <span class="estado estado-cancelado">Cancelado</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="estado estado-programado">${t.estadoNombre}</span>
-                            </c:otherwise>
-                        </c:choose>
+                        <p class="turno-detalle">
+                            <i class="fas fa-user-md"></i> ${t.nombreMedico}
+                        </p>
+
+                        <p class="turno-detalle">
+                            <i class="fas fa-calendar-alt"></i> ${t.fecha}
+                            &nbsp;&nbsp;
+                            <i class="fas fa-clock"></i> ${t.hora}
+                        </p>
+
+                        <span class="estado ${t.estadoNombre}">
+                            ${t.estadoNombre}
+                        </span>
+
                     </div>
                 </c:forEach>
+
             </div>
+
         </c:otherwise>
+
     </c:choose>
 
 </div>

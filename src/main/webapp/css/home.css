@@ -1,53 +1,80 @@
-/* === TARJETAS DE TURNOS === */
+/* ===============================
+   HOME - Tarjetas de próximos turnos
+================================ */
+
+/* texto intro */
+.intro-text {
+    color: #555;
+    margin-bottom: 25px;
+    font-size: 15px;
+}
+
+/* título de sección */
+.titulo-seccion {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    color: #2d3e50;
+}
+
+/* mensaje sin turnos */
+.sin-turnos {
+    color: #666;
+    padding: 10px 0;
+}
+
+/* contenedor de tarjetas */
 .turnos-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 15px;
-    margin-top: 20px;
 }
 
+/* tarjeta */
 .turno-card {
     background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease;
+    border-radius: 6px;
+    padding: 18px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
 
-.turno-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
-}
-
-.turno-card h3 {
+/* nombre del paciente */
+.turno-paciente {
     margin: 0 0 8px 0;
     font-size: 18px;
+    color: #2d3e50;
 }
 
-.turno-card small {
-    color: #555;
+/* detalles (médico, fecha, hora) */
+.turno-detalle {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #444;
 }
 
-/* === BADGES DE ESTADO === */
+/* estado */
 .estado {
-    padding: 5px 8px;
-    border-radius: 5px;
-    font-size: 13px;
-    font-weight: bold;
     display: inline-block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    text-transform: capitalize;
 }
 
-.estado-programado {
-    background: #2e8bff;
-    color: white;
+/* Colores por estado */
+.estado.Programado {
+    background: #dff5dd;
+    color: #1b7d2b;
 }
 
-.estado-completado {
-    background: #4caf50;
-    color: white;
+.estado.Cancelado {
+    background: #f8d7da;
+    color: #842029;
 }
 
-.estado-cancelado {
-    background: #d32f2f;
-    color: white;
+.estado.Completado {
+    background: #d1ecf1;
+    color: #0c5460;
 }

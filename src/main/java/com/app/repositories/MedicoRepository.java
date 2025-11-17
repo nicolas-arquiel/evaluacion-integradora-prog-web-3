@@ -116,6 +116,57 @@ public class MedicoRepository {
         return null;
     }
 
+    // ============================================
+    // NUEVOS MÉTODOS DE VALIDACIÓN
+    // ============================================
+    
+    /**
+     * Verifica si ya existe una matrícula en la base de datos
+     */
+    public boolean existeMatricula(String matricula) {
+        String sql = "SELECT COUNT(*) FROM medicos WHERE matricula = ? AND activo = true";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, matricula);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Verifica si existe una matrícula en otro médico (para actualización)
+     */
+    public boolean existeMatriculaOtroMedico(String matricula, int idMedico) {
+        String sql = "SELECT COUNT(*) FROM medicos WHERE matricula = ? AND id != ? AND activo = true";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setString(1, matricula);
+            ps.setInt(2, idMedico);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+
     private List<Integer> obrasPorMedico(int id) {
         List<Integer> ids = new ArrayList<>();
         String sql = "SELECT obra_social_id FROM medicos_obras_sociales WHERE medico_id = ?";

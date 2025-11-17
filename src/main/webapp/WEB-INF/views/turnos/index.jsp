@@ -5,6 +5,7 @@
 <head>
     <title>Gestión de Turnos - Salud Total</title>
     <jsp:include page="/WEB-INF/includes/header.jsp" />
+    <link rel="stylesheet" href="/css/turnos.css">   
     <script src="/js/turnos.js"></script>
 </head>
 <body>
@@ -13,16 +14,16 @@
 <jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
 <!-- CONTENIDO -->
-<div class="content" 
+<div class="content"
      data-medicos='[<c:forEach var="m" items="${medicos}" varStatus="status">{"id":${m.id},"nombre":"${m.nombre}","especialidad":"${m.especialidadDescripcion}","obras":[${m.obrasSocialesIdsCsv}]}<c:if test="${!status.last}">,</c:if></c:forEach>]'
      data-pacientes='[<c:forEach var="p" items="${pacientes}" varStatus="status">{"id":${p.id},"nombre":"${p.nombre}","obraSocialId":${p.obraSocialId},"obraSocialNombre":"${p.obraSocialNombre}"}<c:if test="${!status.last}">,</c:if></c:forEach>]'>
 
     <h2><i class="fas fa-calendar-alt"></i> Gestión de Turnos</h2>
 
-    <div style="background: #e8f4fd; padding: 12px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #007bff;">
-        <p style="margin: 0; color: #055160;">
-            <i class="fas fa-info-circle"></i> 
-            <strong>Horarios de atención:</strong> Lunes a Viernes de 8:00 a 17:45 hs (último turno). 
+    <div class="info-box">
+        <p>
+            <i class="fas fa-info-circle"></i>
+            <strong>Horarios de atención:</strong> Lunes a Viernes de 8:00 a 17:45 hs.
             La clínica no atiende fines de semana.
         </p>
     </div>
@@ -38,12 +39,12 @@
         <select name="idMedico">
             <option value="">-- Todos los médicos --</option>
             <c:forEach var="m" items="${medicos}">
-                <option value="${m.id}">Dr. ${m.nombre} (${m.especialidadDescripcion})</option>
+                <option value="${m.id}">${m.nombre} (${m.especialidadDescripcion})</option>
             </c:forEach>
         </select>
 
-        <input type="date" name="desde" placeholder="Desde">
-        <input type="date" name="hasta" placeholder="Hasta">
+        <input type="date" name="desde">
+        <input type="date" name="hasta">
 
         <button class="btn btn-primary" type="submit">
             <i class="fas fa-filter"></i> Filtrar Agenda
@@ -66,43 +67,60 @@
             <tr>
                 <td>${t.id}</td>
                 <td>${t.nombrePaciente}</td>
-                <td>Dr. ${t.nombreMedico}</td>
+                <td>${t.nombreMedico}</td>
                 <td>${t.fecha}</td>
                 <td>${t.hora}</td>
+
                 <td>
                     <c:choose>
-                        <c:when test="${t.estadoNombre == 'Programado'}">
-                            <span style="color: green; font-weight: bold;">
-                                <i class="fas fa-clock"></i> ${t.estadoNombre}
+                        <c:when test="${t.estadoNombre == 'programado' || t.estadoNombre == 'Programado'}">
+                            <span class="estado estado-programado">
+                                <i class="fas fa-clock estado-icon"></i> ${t.estadoNombre}
                             </span>
                         </c:when>
-                        <c:when test="${t.estadoNombre == 'Cancelado'}">
-                            <span style="color: red; font-weight: bold;">
-                                <i class="fas fa-times-circle"></i> ${t.estadoNombre}
+
+                        <c:when test="${t.estadoNombre == 'cancelado' || t.estadoNombre == 'Cancelado'}">
+                            <span class="estado estado-cancelado">
+                                <i class="fas fa-times-circle estado-icon"></i> ${t.estadoNombre}
                             </span>
                         </c:when>
+
+                        <c:when test="${t.estadoNombre == 'completado' || t.estadoNombre == 'Completado'}">
+                            <span class="estado estado-completado">
+                                <i class="fas fa-check-circle estado-icon"></i> ${t.estadoNombre}
+                            </span>
+                        </c:when>
+
                         <c:otherwise>
-                            <span style="color: orange; font-weight: bold;">
-                                <i class="fas fa-question-circle"></i> ${t.estadoNombre}
+                            <span class="estado estado-desconocido">
+                                <i class="fas fa-question-circle estado-icon"></i> ${t.estadoNombre}
                             </span>
                         </c:otherwise>
                     </c:choose>
                 </td>
-                <td>
-                    <button class="btn btn-primary btn-editar"
-                            data-id="${t.id}"
-                            data-pacienteid="${t.pacienteId}"
-                            data-medicoid="${t.medicoId}"
-                            data-fecha="${t.fecha}"
-                            data-hora="${t.hora}"
-                            data-obrasocialid="${t.obraSocialId}"
-                            data-notas="${t.notas}">
-                        <i class="fas fa-edit"></i> Modificar
-                    </button>
 
-                    <button class="btn btn-danger" onclick="cancelarTurno('${t.id}')">
-                        <i class="fas fa-ban"></i> Cancelar
-                    </button>
+                <td>
+                    <!-- Solo mostrar acciones si está programado -->
+                    <c:if test="${t.estadoId == 1}">
+                        <button class="btn btn-primary btn-editar"
+                                data-id="${t.id}"
+                                data-pacienteid="${t.pacienteId}"
+                                data-medicoid="${t.medicoId}"
+                                data-fecha="${t.fecha}"
+                                data-hora="${t.hora}"
+                                data-obrasocialid="${t.obraSocialId}"
+                                data-notas="${t.notas}">
+                            <i class="fas fa-edit"></i> Modificar
+                        </button>
+
+                        <button class="btn btn-success" onclick="completarTurno('${t.id}')">
+                            <i class="fas fa-check"></i> Completar
+                        </button>
+
+                        <button class="btn btn-danger" onclick="cancelarTurno('${t.id}')">
+                            <i class="fas fa-ban"></i> Cancelar
+                        </button>
+                    </c:if>
                 </td>
             </tr>
         </c:forEach>
@@ -120,9 +138,7 @@
         <select id="paciente" name="pacienteId" onchange="onPacienteChange()" required>
             <option value="">-- Seleccionar paciente --</option>
             <c:forEach var="p" items="${pacientes}">
-                <option value="${p.id}"
-                        data-obrasocialid="${p.obraSocialId}"
-                        data-obrasocialnombre="${p.obraSocialNombre}">
+                <option value="${p.id}" data-obrasocialid="${p.obraSocialId}" data-obrasocialnombre="${p.obraSocialNombre}">
                     ${p.nombre}
                 </option>
             </c:forEach>
@@ -130,7 +146,7 @@
 
         <br><br>
         <label><i class="fas fa-hospital"></i> Cobertura Médica:</label>
-        <input type="text" id="obra-social-display" readonly style="background:#f0f0f0;">
+        <input type="text" id="obra-social-display" readonly class="readonly-field">
 
         <br><br>
         <label><i class="fas fa-user-md"></i> Médico Tratante:</label>
@@ -145,25 +161,20 @@
         <br><br>
         <label><i class="fas fa-clock"></i> Hora del Turno:</label>
         <input type="time" id="hora" name="hora" required min="08:00" max="17:45" step="900">
-        <small style="color: #666; font-style: italic;">
-            Horario: 8:00 a 17:45 hs - Intervalos de 15 minutos - Solo días hábiles
-        </small>
+
+        <!-- Estado siempre 1 -->
+        <input type="hidden" id="estadoId" name="estadoId" value="1">
 
         <br><br>
-        <label><i class="fas fa-sticky-note"></i> Observaciones Clínicas:</label>
-        <textarea id="notas" name="notas" style="height:60px;" placeholder="Motivo de consulta, síntomas, observaciones..."></textarea>
+        <label><i class="fas fa-sticky-note"></i> Observaciones:</label>
+        <textarea id="notas" name="notas" style="height:60px;"></textarea>
 
         <br><br>
-        <button class="btn btn-primary" type="submit">
-            <i class="fas fa-save"></i> Confirmar Turno
-        </button>
-        <button type="button" class="btn" onclick="modalForm.close()">
-            <i class="fas fa-times"></i> Cancelar
-        </button>
+        <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Confirmar Turno</button>
+        <button type="button" class="btn" onclick="modalForm.close()"><i class="fas fa-times"></i> Cancelar</button>
     </form>
 </dialog>
 
-<!-- Incluir sistema de alertas -->
 <jsp:include page="/WEB-INF/includes/alerts.jsp" />
 
 </body>

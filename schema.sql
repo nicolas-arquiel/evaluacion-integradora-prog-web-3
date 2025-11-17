@@ -66,7 +66,6 @@ CREATE TABLE turnos (
     hora TIME NOT NULL,
     estado_id INTEGER NOT NULL DEFAULT 1,
     notas TEXT,
-    activo BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
     FOREIGN KEY (medico_id) REFERENCES medicos(id) ON DELETE CASCADE,
     FOREIGN KEY (estado_id) REFERENCES estados(id),

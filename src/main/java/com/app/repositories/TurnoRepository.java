@@ -16,8 +16,8 @@ public class TurnoRepository {
         List<Turno> turnos = new ArrayList<>();
 
         String sql = """
-            SELECT t.id, t.paciente_id, t.medico_id, t.fecha, t.hora, 
-                   t.estado_id, t.notas, t.activo,
+            SELECT t.id, t.paciente_id, t.medico_id, t.fecha, t.hora,
+                   t.estado_id, t.notas,
                    e.nombre AS estado_nombre,
                    m.nombre AS medico_nombre,
                    p.nombre AS paciente_nombre,
@@ -26,7 +26,6 @@ public class TurnoRepository {
             JOIN estados e ON e.id = t.estado_id
             JOIN medicos m ON t.medico_id = m.id
             JOIN pacientes p ON t.paciente_id = p.id
-            WHERE t.activo = true
             ORDER BY t.fecha DESC, t.hora DESC
         """;
 
@@ -43,7 +42,6 @@ public class TurnoRepository {
                 t.setHora(rs.getTime("hora"));
                 t.setEstadoId(rs.getInt("estado_id"));
                 t.setNotas(rs.getString("notas"));
-                t.setActivo(rs.getBoolean("activo"));
                 t.setEstadoNombre(rs.getString("estado_nombre"));
                 t.setNombreMedico(rs.getString("medico_nombre"));
                 t.setNombrePaciente(rs.getString("paciente_nombre"));
@@ -90,9 +88,8 @@ public class TurnoRepository {
                 t.setHora(rs.getTime("hora"));
                 t.setEstadoId(rs.getInt("estado_id"));
                 t.setNotas(rs.getString("notas"));
-                t.setActivo(rs.getBoolean("activo"));
                 t.setNombreMedico(rs.getString("medico_nombre"));
-                t.setNombrePaciente(rs.getString("paciente_nombre"));
+                t.setNombrePaciente(rs.getString("paciente_nombre")); // <-- BUG FIX
                 t.setObraSocialId(rs.getInt("obra_social_id"));
                 t.setEstadoNombre(rs.getString("estado_nombre"));
                 return t;
@@ -112,8 +109,8 @@ public class TurnoRepository {
         List<Turno> turnos = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-            SELECT t.id, t.paciente_id, t.medico_id, t.fecha, t.hora, 
-                   t.estado_id, t.notas, t.activo,
+            SELECT t.id, t.paciente_id, t.medico_id, t.fecha, t.hora,
+                   t.estado_id, t.notas,
                    e.nombre AS estado_nombre,
                    m.nombre AS medico_nombre,
                    p.nombre AS paciente_nombre,
@@ -122,18 +119,16 @@ public class TurnoRepository {
             JOIN estados e ON e.id = t.estado_id
             JOIN medicos m ON t.medico_id = m.id
             JOIN pacientes p ON t.paciente_id = p.id
-            WHERE t.activo = true
+            WHERE 1 = 1
         """);
 
         List<Object> params = new ArrayList<>();
 
-        // FILTRO POR MÉDICO
         if (idMedico != null) {
             sql.append(" AND t.medico_id = ?");
             params.add(idMedico);
         }
 
-        // FILTROS DE FECHA
         boolean tieneDesde = (desde != null && !desde.isEmpty());
         boolean tieneHasta = (hasta != null && !hasta.isEmpty());
 
@@ -160,11 +155,8 @@ public class TurnoRepository {
 
             for (int i = 0; i < params.size(); i++) {
                 Object val = params.get(i);
-                if (val instanceof Integer) {
-                    ps.setInt(i + 1, (Integer) val);
-                } else if (val instanceof Date) {
-                    ps.setDate(i + 1, (Date) val);
-                }
+                if (val instanceof Integer) ps.setInt(i + 1, (Integer) val);
+                else if (val instanceof Date) ps.setDate(i + 1, (Date) val);
             }
 
             ResultSet rs = ps.executeQuery();
@@ -178,7 +170,6 @@ public class TurnoRepository {
                 t.setHora(rs.getTime("hora"));
                 t.setEstadoId(rs.getInt("estado_id"));
                 t.setNotas(rs.getString("notas"));
-                t.setActivo(rs.getBoolean("activo"));
                 t.setEstadoNombre(rs.getString("estado_nombre"));
                 t.setNombreMedico(rs.getString("medico_nombre"));
                 t.setNombrePaciente(rs.getString("paciente_nombre"));
@@ -197,7 +188,11 @@ public class TurnoRepository {
     // DUPLICADOS
     // =============================
     public boolean existeTurnoDuplicado(int idMedico, Date fecha, Time hora) {
-        String sql = "SELECT COUNT(*) FROM turnos WHERE medico_id = ? AND fecha = ? AND hora = ? AND activo = true";
+        String sql = """
+            SELECT COUNT(*) FROM turnos 
+            WHERE medico_id = ? AND fecha = ? AND hora = ?
+              AND estado_id = 1
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -225,8 +220,8 @@ public class TurnoRepository {
         }
 
         String sql = """
-            INSERT INTO turnos (paciente_id, medico_id, fecha, hora, estado_id, notas, activo)
-            VALUES (?, ?, ?, ?, ?, ?, true)
+            INSERT INTO turnos (paciente_id, medico_id, fecha, hora, estado_id, notas)
+            VALUES (?, ?, ?, ?, ?, ?)
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -251,8 +246,8 @@ public class TurnoRepository {
     public void actualizar(Turno t) throws SQLException {
         String sql = """
             UPDATE turnos
-               SET paciente_id=?, medico_id=?, fecha=?, hora=?, estado_id=?, notas=?
-             WHERE id=?
+            SET paciente_id=?, medico_id=?, fecha=?, hora=?, estado_id=?, notas=?
+            WHERE id=?
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -270,10 +265,10 @@ public class TurnoRepository {
     }
 
     // =============================
-    // CANCELAR (BAJA LÓGICA)
+    // CANCELAR
     // =============================
     public void cancelar(int id) {
-        String sql = "UPDATE turnos SET estado_id=2, activo=false WHERE id=?";
+        String sql = "UPDATE turnos SET estado_id = 2 WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -293,8 +288,8 @@ public class TurnoRepository {
         List<Turno> turnos = new ArrayList<>();
 
         String sql = """
-            SELECT t.id, t.paciente_id, t.medico_id, t.fecha, t.hora, 
-                   t.estado_id, t.notas, t.activo,
+            SELECT t.id, t.paciente_id, t.medico_id, t.fecha, t.hora,
+                   t.estado_id, t.notas,
                    e.nombre AS estado_nombre,
                    m.nombre AS medico_nombre,
                    p.nombre AS paciente_nombre,
@@ -303,7 +298,7 @@ public class TurnoRepository {
             JOIN estados e ON e.id = t.estado_id
             JOIN medicos m ON t.medico_id = m.id
             JOIN pacientes p ON t.paciente_id = p.id
-            WHERE t.fecha >= CURRENT_DATE AND t.activo = true
+            WHERE t.fecha >= CURRENT_DATE AND t.estado_id = 1
             ORDER BY t.fecha, t.hora
             LIMIT 50
         """;
@@ -321,7 +316,6 @@ public class TurnoRepository {
                 t.setHora(rs.getTime("hora"));
                 t.setEstadoId(rs.getInt("estado_id"));
                 t.setNotas(rs.getString("notas"));
-                t.setActivo(rs.getBoolean("activo"));
                 t.setEstadoNombre(rs.getString("estado_nombre"));
                 t.setNombreMedico(rs.getString("medico_nombre"));
                 t.setNombrePaciente(rs.getString("paciente_nombre"));

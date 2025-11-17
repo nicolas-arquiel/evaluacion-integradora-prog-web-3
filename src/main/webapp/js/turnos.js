@@ -34,6 +34,8 @@ function resetCampos() {
     document.getElementById("obra-social-display").value = "";
     document.getElementById("medico").innerHTML = '<option value="">-- Primero seleccione el paciente --</option>';
     document.getElementById("notas").value = "";
+    // ❌ SE ELIMINÓ SOLO ESTA LÍNEA
+    // document.getElementById("estadoId").value = "1";
 }
 
 function abrirNuevo() {
@@ -43,11 +45,10 @@ function abrirNuevo() {
     document.getElementById("fecha").value = "";
     document.getElementById("hora").value = "";
     resetCampos();
-    
-    // Establecer fecha mínima (hoy) y bloquear fines de semana
+
     const hoy = new Date();
     document.getElementById("fecha").min = hoy.toISOString().split('T')[0];
-    
+
     modalForm.showModal();
 }
 
@@ -65,6 +66,11 @@ function abrirEditar(turno) {
         document.getElementById("medico").value = turno.medicoId;
     }, 100);
 
+    // ❌ SE ELIMINÓ SOLO ESTA PARTE
+    // if (turno.estadoId) {
+    //     document.getElementById("estadoId").value = turno.estadoId;
+    // }
+
     modalForm.showModal();
 }
 
@@ -77,9 +83,8 @@ function actualizarHorasDisponibles() {
     
     if (!fechaSeleccionada) return;
     
-    // Verificar si es fin de semana
     const fecha = new Date(fechaSeleccionada + 'T00:00:00');
-    const diaSemana = fecha.getDay(); // 0=Domingo, 6=Sábado
+    const diaSemana = fecha.getDay();
     
     if (diaSemana === 0 || diaSemana === 6) {
         modalForm.close();
@@ -96,7 +101,6 @@ function actualizarHorasDisponibles() {
         const horaActual = ahora.getHours();
         const minutosActuales = ahora.getMinutes();
         
-        // Si ya pasaron las 16:45, no permitir más turnos para hoy
         if (horaActual > 16 || (horaActual === 16 && minutosActuales > 45)) {
             modalForm.close();
             setTimeout(() => {
@@ -106,7 +110,6 @@ function actualizarHorasDisponibles() {
             return;
         }
         
-        // Calcular próximo slot disponible (mínimo 1 hora + redondear a próximo cuarto)
         const horaMinima = horaActual + 1;
         const minutosMinimos = Math.ceil(minutosActuales / 15) * 15;
         
@@ -118,7 +121,6 @@ function actualizarHorasDisponibles() {
             minutosFinal = 0;
         }
         
-        // Asegurar que esté dentro del horario laboral
         if (horaFinal < 8) {
             horaFinal = 8;
             minutosFinal = 0;
@@ -192,11 +194,9 @@ function cargarMedicos(obraSocialId) {
     medicosFiltrados.forEach(medico => {
         const opt = document.createElement("option");
         opt.value = medico.id;
-        opt.textContent = `Dr. ${medico.nombre} (${medico.especialidad})`;
+        opt.textContent = `${medico.nombre} (${medico.especialidad})`;
         medicoSelect.appendChild(opt);
     });
-
-    console.log("✅ Médicos disponibles:", medicosFiltrados.length);
 }
 
 // ========================================
@@ -205,24 +205,24 @@ function cargarMedicos(obraSocialId) {
 
 function cancelarTurno(id) {
     confirmarEliminacion(
-        "¿Confirma la cancelación de este turno? Esta acción liberará el horario en la agenda.",
+        "¿Confirma la cancelación de este turno?",
         function() {
             window.location.href = "/app/turnos/cancelar/" + id;
         }
     );
 }
 
+function completarTurno(id) {
+    window.location.href = "/app/turnos/completar/" + id;
+}
+
 // ========================================
-//  INICIALIZACIÓN AL CARGAR LA PÁGINA
+//  INICIALIZACIÓN
 // ========================================
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("🟩 Sistema de gestión de turnos cargado");
-
-    // Cargar datos desde atributos data
     inicializarDatos();
 
-    // Configurar botones de editar
     const btns = document.querySelectorAll(".btn-editar");
     btns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -233,14 +233,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 fecha:         btn.dataset.fecha,
                 hora:          btn.dataset.hora.substring(0, 5),
                 obraSocialId:  parseInt(btn.dataset.obrasocialid),
-                notas:         btn.dataset.notas || ""
+                notas:         btn.dataset.notas || "",
+                estadoId:      parseInt(btn.dataset.estadoid || "1")
             };
 
             abrirEditar(turno);
         });
     });
 
-    // Agregar validación de fecha en tiempo real
     const fechaInput = document.getElementById("fecha");
     if (fechaInput) {
         fechaInput.addEventListener('change', actualizarHorasDisponibles);
