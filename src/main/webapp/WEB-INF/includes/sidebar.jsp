@@ -13,6 +13,10 @@
     <a href="/app/medicos" class="${currentPath.contains('medicos') ? 'active' : ''}">
         <i class="fas fa-user-md"></i> Médicos
     </a>
+
+    <a href="/app/especialidades" class="${currentPath.contains('especialidades') ? 'active' : ''}">
+        <i class="fas fa-stethoscope"></i> Especialidades
+    </a>
     
     <a href="/app/pacientes" class="${currentPath.contains('pacientes') ? 'active' : ''}">
         <i class="fas fa-users"></i> Pacientes
