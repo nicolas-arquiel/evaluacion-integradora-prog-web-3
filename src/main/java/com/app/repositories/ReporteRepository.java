@@ -95,7 +95,10 @@ public class ReporteRepository {
                 os.nombre AS obraSocial,
                 COUNT(DISTINCT p.id) as cantidadPacientes,
                 COUNT(t.id) as cantidadTurnos,
-                ROUND(COUNT(t.id) * 1.0 / COUNT(DISTINCT p.id), 2) as promedio
+                ROUND(
+                    COUNT(t.id) * 1.0 / NULLIF(COUNT(DISTINCT p.id), 0),
+                    2
+                ) as promedio
             FROM obras_sociales os
             LEFT JOIN pacientes p ON p.obra_social_id = os.id
             LEFT JOIN turnos t ON t.paciente_id = p.id
@@ -105,8 +108,8 @@ public class ReporteRepository {
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Map<String, Object> fila = new HashMap<>();
@@ -123,6 +126,7 @@ public class ReporteRepository {
 
         return resultado;
     }
+
 
     // Turnos por Estado
     public List<Map<String, Object>> turnosPorEstado() {
@@ -224,35 +228,43 @@ public class ReporteRepository {
         return resultado;
     }
 
-    // Médicos y Obras Sociales
-    public List<Map<String, Object>> medicosYObrasSociales() {
+    // Turnos vencidos en estado programado
+    public List<Map<String, Object>> turnosVencidos() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
         String sql = """
             SELECT 
-                m.nombre AS nombreMedico,
-                e.descripcion AS especialidad,
-                STRING_AGG(os.nombre, ', ') as obrasSociales,
-                COUNT(DISTINCT os.id) as cantidad
-            FROM medicos m
-            LEFT JOIN especialidades e ON m.especialidad_id = e.id
-            LEFT JOIN medicos_obras_sociales mos ON mos.medico_id = m.id
-            LEFT JOIN obras_sociales os ON mos.obra_social_id = os.id
-            WHERE m.activo = true
-            GROUP BY m.id, m.nombre, e.descripcion
-            ORDER BY cantidad DESC, m.nombre
+                t.fecha,
+                t.hora,
+                est.nombre AS estado,
+                p.nombre AS paciente,
+                m.nombre AS medico,
+                e.descripcion AS especialidad
+            FROM turnos t
+            JOIN estados est ON t.estado_id = est.id
+            JOIN pacientes p ON t.paciente_id = p.id
+            JOIN medicos m ON t.medico_id = m.id
+            JOIN especialidades e ON m.especialidad_id = e.id
+            WHERE est.nombre = 'programado'
+            AND (
+                t.fecha < CURRENT_DATE
+                OR (t.fecha = CURRENT_DATE AND t.hora < CURRENT_TIME)
+            )
+            ORDER BY t.fecha DESC, t.hora DESC
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Map<String, Object> fila = new HashMap<>();
-                fila.put("nombreMedico", rs.getString("nombreMedico"));
+                fila.put("fecha", rs.getString("fecha"));
+                fila.put("hora", rs.getString("hora"));
+                fila.put("estado", rs.getString("estado"));
+                fila.put("paciente", rs.getString("paciente"));
+                fila.put("medico", rs.getString("medico"));
                 fila.put("especialidad", rs.getString("especialidad"));
-                fila.put("obrasSociales", rs.getString("obrasSociales"));
-                fila.put("cantidad", rs.getInt("cantidad"));
                 resultado.add(fila);
             }
 
@@ -262,4 +274,6 @@ public class ReporteRepository {
 
         return resultado;
     }
+
+
 }

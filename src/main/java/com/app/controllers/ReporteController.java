@@ -54,7 +54,7 @@ public class ReporteController {
         // Reporte: Turnos por Mes
         models.put("reporteTurnosMes", repo.turnosPorMes());
 
-        // Reporte: Médicos y Obras Sociales
-        models.put("reporteMedicosObras", repo.medicosYObrasSociales());
+        // Reporte: turnos vencidos en estado programado
+        models.put("reporteTurnosVencidos", repo.turnosVencidos());
     }
 }
