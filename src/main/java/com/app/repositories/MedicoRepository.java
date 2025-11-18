@@ -116,13 +116,6 @@ public class MedicoRepository {
         return null;
     }
 
-    // ============================================
-    // NUEVOS MÉTODOS DE VALIDACIÓN
-    // ============================================
-    
-    /**
-     * Verifica si ya existe una matrícula en la base de datos
-     */
     public boolean existeMatricula(String matricula) {
         String sql = "SELECT COUNT(*) FROM medicos WHERE matricula = ? AND activo = true";
         
@@ -143,9 +136,7 @@ public class MedicoRepository {
         return false;
     }
     
-    /**
-     * Verifica si existe una matrícula en otro médico (para actualización)
-     */
+
     public boolean existeMatriculaOtroMedico(String matricula, int idMedico) {
         String sql = "SELECT COUNT(*) FROM medicos WHERE matricula = ? AND id != ? AND activo = true";
         
@@ -191,7 +182,7 @@ public class MedicoRepository {
         if (ids == null || ids.isEmpty()) return lista;
 
         String placeholders = String.join(",", ids.stream().map(x -> "?").toList());
-        String sql = "SELECT id, nombre, activo FROM obras_sociales WHERE id IN (" + placeholders + ")";
+        String sql = "SELECT id, nombre FROM obras_sociales WHERE id IN (" + placeholders + ")";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -204,8 +195,7 @@ public class MedicoRepository {
             while (rs.next()) {
                 lista.add(new ObraSocial(
                     rs.getInt("id"),
-                    rs.getString("nombre"),
-                    rs.getBoolean("activo")
+                    rs.getString("nombre")
                 ));
             }
 
@@ -267,4 +257,20 @@ public class MedicoRepository {
             e.printStackTrace(); 
         }
     }
+
+    public void activar(int id) {
+        String sql = "UPDATE medicos SET activo = TRUE WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        }
+    }
+
+
 }

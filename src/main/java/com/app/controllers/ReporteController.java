@@ -29,7 +29,7 @@ public class ReporteController {
     @View("reportes/index.jsp")
     public void index() {
         
-        // Reporte: Turnos por Médico
+        // Turnos por medico
         models.put("reporteTurnosMedico", repo.turnosPorMedico());
         models.put("totalMedicos", repoMedicos.listar().size());
         
@@ -38,23 +38,23 @@ public class ReporteController {
         int promedio = totalMedicos > 0 ? totalTurnos / totalMedicos : 0;
         models.put("promedioTurnosMedico", promedio);
 
-        // Reporte: Turnos por Especialidad
+        // Turnos por especialidad
         models.put("reporteTurnosEspecialidad", repo.turnosPorEspecialidad());
 
-        // Reporte: Turnos por Obra Social
+        // Turnos por obra social
         models.put("reporteTurnosObraSocial", repo.turnosPorObraSocial());
 
-        // Reporte: Estados de Turnos
+        // Estados de turnos
         models.put("reporteEstados", repo.turnosPorEstado());
         models.put("estadosProgramados", repo.contarPorEstado("programado"));
         models.put("estadosCompletados", repo.contarPorEstado("completado"));
         models.put("estadosCancelados", repo.contarPorEstado("cancelado"));
         models.put("estadosTotal", totalTurnos);
 
-        // Reporte: Turnos por Mes
+        // Turnos por mes
         models.put("reporteTurnosMes", repo.turnosPorMes());
 
-        // Reporte: turnos vencidos en estado programado
+        // turnos vencidos en estado programado
         models.put("reporteTurnosVencidos", repo.turnosVencidos());
     }
 }

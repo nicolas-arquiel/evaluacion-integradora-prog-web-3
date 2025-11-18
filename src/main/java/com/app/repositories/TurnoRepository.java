@@ -9,9 +9,6 @@ import java.util.List;
 
 public class TurnoRepository {
 
-    // =============================
-    // LISTAR TODOS
-    // =============================
     public List<Turno> listar() {
         List<Turno> turnos = new ArrayList<>();
 
@@ -56,9 +53,6 @@ public class TurnoRepository {
         return turnos;
     }
 
-    // =============================
-    // BUSCAR POR ID
-    // =============================
     public Turno buscarPorId(int id) {
         String sql = """
             SELECT t.*, 
@@ -102,10 +96,7 @@ public class TurnoRepository {
         return null;
     }
 
-    // =============================
-    // FILTRAR 
-    // =============================
-    public List<Turno> filtrar(Integer idMedico, String desde, String hasta) {
+    public List<Turno> filtrar(Integer idMedico, String desde, String hasta, List<Integer> estados) {
         List<Turno> turnos = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
@@ -124,28 +115,37 @@ public class TurnoRepository {
 
         List<Object> params = new ArrayList<>();
 
+        // FILTRO MÉDICO
         if (idMedico != null) {
             sql.append(" AND t.medico_id = ?");
             params.add(idMedico);
         }
 
-        boolean tieneDesde = (desde != null && !desde.isEmpty());
-        boolean tieneHasta = (hasta != null && !hasta.isEmpty());
+        // FILTROS FECHAS
+        boolean tieneDesde = desde != null && !desde.isEmpty();
+        boolean tieneHasta = hasta != null && !hasta.isEmpty();
 
-        if (tieneDesde && !tieneHasta) {
+        if (tieneDesde) {
             sql.append(" AND t.fecha >= ?");
             params.add(Date.valueOf(desde));
         }
 
-        if (!tieneDesde && tieneHasta) {
+        if (tieneHasta) {
             sql.append(" AND t.fecha <= ?");
             params.add(Date.valueOf(hasta));
         }
 
-        if (tieneDesde && tieneHasta) {
-            sql.append(" AND t.fecha BETWEEN ? AND ?");
-            params.add(Date.valueOf(desde));
-            params.add(Date.valueOf(hasta));
+        // FILTRO ESTADOS
+        if (estados != null && !estados.isEmpty()) {
+            sql.append(" AND t.estado_id IN (");
+
+            for (int i = 0; i < estados.size(); i++) {
+                sql.append("?");
+                if (i < estados.size() - 1) sql.append(", ");
+                params.add(estados.get(i));
+            }
+
+            sql.append(")");
         }
 
         sql.append(" ORDER BY t.fecha DESC, t.hora DESC");
@@ -153,10 +153,12 @@ public class TurnoRepository {
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql.toString())) {
 
+            // SET PARAMS
             for (int i = 0; i < params.size(); i++) {
-                Object val = params.get(i);
-                if (val instanceof Integer) ps.setInt(i + 1, (Integer) val);
-                else if (val instanceof Date) ps.setDate(i + 1, (Date) val);
+                Object v = params.get(i);
+
+                if (v instanceof Integer) ps.setInt(i + 1, (Integer) v);
+                else if (v instanceof Date) ps.setDate(i + 1, (Date) v);
             }
 
             ResultSet rs = ps.executeQuery();
@@ -184,9 +186,6 @@ public class TurnoRepository {
         return turnos;
     }
 
-    // =============================
-    // DUPLICADOS
-    // =============================
     public boolean existeTurnoDuplicado(int idMedico, Date fecha, Time hora) {
         String sql = """
             SELECT COUNT(*) FROM turnos 
@@ -211,9 +210,6 @@ public class TurnoRepository {
         return false;
     }
 
-    // =============================
-    // INSERTAR
-    // =============================
     public void insertar(Turno t) throws SQLException {
         if (existeTurnoDuplicado(t.getMedicoId(), t.getFecha(), t.getHora())) {
             throw new SQLException("Ya existe un turno para este médico en esa fecha y hora.");
@@ -240,9 +236,6 @@ public class TurnoRepository {
         }
     }
 
-    // =============================
-    // ACTUALIZAR
-    // =============================
     public void actualizar(Turno t) throws SQLException {
         String sql = """
             UPDATE turnos
@@ -264,9 +257,6 @@ public class TurnoRepository {
         }
     }
 
-    // =============================
-    // CANCELAR
-    // =============================
     public void cancelar(int id) {
         String sql = "UPDATE turnos SET estado_id = 2 WHERE id = ?";
 
@@ -281,9 +271,6 @@ public class TurnoRepository {
         }
     }
 
-    // =============================
-    // PRÓXIMOS TURNOS
-    // =============================
     public List<Turno> obtenerProximosTurnos() {
         List<Turno> turnos = new ArrayList<>();
 

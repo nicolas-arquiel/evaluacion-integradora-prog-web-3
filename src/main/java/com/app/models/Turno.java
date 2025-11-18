@@ -11,8 +11,6 @@ public class Turno {
     private Time hora;
     private int estadoId;
     private String notas;
-
-    // Para mostrar en vistas
     private String estadoNombre;
     private String nombrePaciente;
     private String nombreMedico;

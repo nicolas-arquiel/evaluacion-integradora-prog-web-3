@@ -38,7 +38,7 @@ public class EspecialidadController {
         if (error != null) models.put("error", error);
     }
 
-    // GUARDAR (alta o edición)
+    // GUARDAR
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String guardar(
@@ -52,7 +52,7 @@ public class EspecialidadController {
             }
 
             if (id == null || id == 0) {
-                // Alta
+                // Crear
                 Especialidad e = new Especialidad();
                 e.setDescripcion(descripcion);
                 repo.insertar(e);
@@ -60,7 +60,7 @@ public class EspecialidadController {
                 return AlertUtils.redirectWithSuccess("/especialidades",
                         "Especialidad creada exitosamente");
             } else {
-                // Edición
+                // Editar
                 Especialidad e = repo.obtenerPorId(id);
                 if (e == null) {
                     return AlertUtils.redirectWithError("/especialidades",

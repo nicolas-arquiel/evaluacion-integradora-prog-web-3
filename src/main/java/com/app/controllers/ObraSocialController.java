@@ -24,9 +24,7 @@ public class ObraSocialController {
     @Inject
     private Models models;
 
-    // ======================================================
-    // LISTAR (INDEX)
-    // ======================================================
+    // LISTAR
     @GET
     @View("obrasocial/index.jsp")
     public void listar(
@@ -36,25 +34,14 @@ public class ObraSocialController {
             @QueryParam("info") String info
     ) {
         models.put("items", repo.listar());
-        
-        // Pasar mensajes desde parámetros URL
-        if (success != null && !success.isEmpty()) {
-            models.put("success", success);
-        }
-        if (error != null && !error.isEmpty()) {
-            models.put("error", error);
-        }
-        if (warning != null && !warning.isEmpty()) {
-            models.put("warning", warning);
-        }
-        if (info != null && !info.isEmpty()) {
-            models.put("info", info);
-        }
+
+        if (success != null && !success.isEmpty()) models.put("success", success);
+        if (error != null && !error.isEmpty()) models.put("error", error);
+        if (warning != null && !warning.isEmpty()) models.put("warning", warning);
+        if (info != null && !info.isEmpty()) models.put("info", info);
     }
 
-    // ======================================================
-    // GUARDAR (CREAR O EDITAR)
-    // ======================================================
+    // GUARDAR
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String guardar(
@@ -64,88 +51,123 @@ public class ObraSocialController {
     ) {
 
         try {
-            // Validar campos vacíos
             if (nombre == null || nombre.trim().isEmpty()) {
-                return AlertUtils.redirectWithError("/obras-sociales", 
-                    "El nombre de la obra social es obligatorio");
+                return AlertUtils.redirectWithError(
+                        "/obras-sociales",
+                        "El nombre de la obra social es obligatorio"
+                );
             }
 
-            // Normalizar el nombre
             nombre = nombre.trim();
 
-            // Validar longitud
             if (nombre.length() < 2) {
-                return AlertUtils.redirectWithError("/obras-sociales", 
-                    "El nombre debe tener al menos 2 caracteres");
+                return AlertUtils.redirectWithError(
+                        "/obras-sociales",
+                        "El nombre debe tener al menos 2 caracteres"
+                );
             }
-            
+
             if (nombre.length() > 100) {
-                return AlertUtils.redirectWithError("/obras-sociales", 
-                    "El nombre no puede tener más de 100 caracteres");
+                return AlertUtils.redirectWithError(
+                        "/obras-sociales",
+                        "El nombre no puede tener más de 100 caracteres"
+                );
             }
 
             if ("crear".equals(action)) {
-                // Verificar si ya existe una obra social con el mismo nombre
+
                 if (repo.existePorNombre(nombre)) {
-                    return AlertUtils.redirectWithError("/obras-sociales", 
-                        "Ya existe una obra social con el nombre " + nombre);
+                    return AlertUtils.redirectWithError(
+                            "/obras-sociales",
+                            "Ya existe una obra social con el nombre " + nombre
+                    );
                 }
 
                 ObraSocial nueva = new ObraSocial();
                 nueva.setNombre(nombre);
-                nueva.setActivo(true);
                 repo.insertar(nueva);
 
-                return AlertUtils.redirectWithSuccess("/obras-sociales", 
-                    "Obra social " + nombre + " creada exitosamente");
+                return AlertUtils.redirectWithSuccess(
+                        "/obras-sociales",
+                        "Obra social " + nombre + " creada exitosamente"
+                );
 
             } else if ("actualizar".equals(action)) {
-                // Verificar si ya existe otra obra social con el mismo nombre (excluyendo la actual)
+
                 if (repo.existePorNombreExcluyendoId(nombre, id)) {
-                    return AlertUtils.redirectWithError("/obras-sociales", 
-                        "Ya existe otra obra social con el nombre " + nombre);
+                    return AlertUtils.redirectWithError(
+                            "/obras-sociales",
+                            "Ya existe otra obra social con el nombre " + nombre
+                    );
                 }
 
-                ObraSocial editada = new ObraSocial(id, nombre, true);
+                ObraSocial editada = new ObraSocial(id, nombre);
                 repo.actualizar(editada);
 
-                return AlertUtils.redirectWithSuccess("/obras-sociales", 
-                    "Obra social " + nombre + " actualizada exitosamente");
+                return AlertUtils.redirectWithSuccess(
+                        "/obras-sociales",
+                        "Obra social " + nombre + " actualizada exitosamente"
+                );
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            return AlertUtils.redirectWithError("/obras-sociales", 
-                "Error en la base de datos: " + e.getMessage());
+            return AlertUtils.redirectWithError(
+                    "/obras-sociales",
+                    "Error en la base de datos: " + e.getMessage()
+            );
         } catch (Exception e) {
             e.printStackTrace();
-            return AlertUtils.redirectWithError("/obras-sociales", 
-                "Error inesperado: " + e.getMessage());
+            return AlertUtils.redirectWithError(
+                    "/obras-sociales",
+                    "Error inesperado: " + e.getMessage()
+            );
         }
 
         return AlertUtils.redirectWithInfo("/obras-sociales", "Operación completada");
     }
 
-    // ======================================================
-    // ELIMINAR (BAJA LÓGICA)
-    // ======================================================
+        
+    // ELIMINAR
     @GET
     @Path("/eliminar/{id}")
     public String eliminar(@PathParam("id") int id) {
         try {
             ObraSocial obra = repo.obtenerPorId(id);
-            if (obra != null) {
-                repo.eliminar(id);
-                return AlertUtils.redirectWithSuccess("/obras-sociales", 
-                    "Obra social " + obra.getNombre() + " eliminada exitosamente");
-            } else {
-                return AlertUtils.redirectWithError("/obras-sociales", 
-                    "La obra social no existe");
+
+            if (obra == null) {
+                return AlertUtils.redirectWithError(
+                        "/obras-sociales",
+                        "La obra social no existe"
+                );
             }
+
+            int cantidadPacientes = repo.contarPacientesAsociados(id);
+
+            if (cantidadPacientes > 0) {
+                return AlertUtils.redirectWithError(
+                    "/obras-sociales",
+                    "No es posible eliminar la obra social " + obra.getNombre() +
+                    " porque está siendo utilizada por " + cantidadPacientes + " paciente(s)."
+                );
+            }
+
+            repo.eliminar(id);
+
+            return AlertUtils.redirectWithSuccess(
+                    "/obras-sociales",
+                    "Obra social " + obra.getNombre() + " eliminada exitosamente"
+            );
+
         } catch (Exception e) {
             e.printStackTrace();
-            return AlertUtils.redirectWithError("/obras-sociales", 
-                "Error al eliminar la obra social: " + e.getMessage());
+            return AlertUtils.redirectWithError(
+                    "/obras-sociales",
+                    "Error al eliminar la obra social: " + e.getMessage()
+            );
         }
     }
+
+
+
 }

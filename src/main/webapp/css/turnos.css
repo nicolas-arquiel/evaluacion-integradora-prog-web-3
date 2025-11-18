@@ -1,111 +1,70 @@
-/* ============================================================
-   TURNOS.CSS – ESTILOS ESPECÍFICOS PARA LA VISTA DE TURNOS
-   (NO DUPLICA ni SOBRESCRIBE los estilos globales)
-============================================================ */
-
-/* ========================================
-   CAJA INFORMATIVA
-======================================== */
 .info-box {
-    background: #e8f4fd;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    border-left: 4px solid #007bff;
-    color: #055160;
+  background: #e8f4fd;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #007bff;
+  color: #055160;
 }
 
-/* ========================================
-   CAMPOS READONLY
-======================================== */
 .readonly-field {
-    background: #f0f0f0 !important;
+  background: #f0f0f0 !important;
 }
-
-/* ========================================
-   ESTADOS DE TURNOS
-======================================== */
-
-.estado {
-    font-weight: bold;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-}
-
-.estado-icon {
-    opacity: 0.8;
-}
-
-/* Estados */
-.estado-programado {
-    color: #0b7a27;
-}
-
-.estado-cancelado {
-    color: #c00000;
-}
-
-.estado-completado {
-    color: #0044cc;
-}
-
-.estado-desconocido {
-    color: #c77f00;
-}
-
-/* ========================================
-   TABLA DE TURNOS
-   (solo detalles, sin tocar estilos globales)
-======================================== */
 
 table.turnos-table td {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
-/* Color suave en hover solo para esta tabla */
 table.turnos-table tr:hover {
-    background: #f5faff;
+  background: #f5faff;
 }
-
-/* ========================================
-   BOTONES ESPECÍFICOS DE TURNOS
-======================================== */
 
 .btn-editar {
-    margin-right: 6px;
+  margin-right: 6px;
 }
 
 .btn-completar {
-    background: #5cb85c;
-    color: white;
+  background: #5cb85c;
+  color: white;
 }
 
 .btn-cancelar {
-    background: #d9534f;
-    color: white;
+  background: #d9534f;
+  color: white;
 }
-
-/* ========================================
-   MODAL SOLO PARA TURNOS
-======================================== */
 
 #modalForm textarea {
-    resize: vertical;
+  resize: vertical;
 }
 
-/* Corrección de inputs del modal */
 #modalForm input[type="time"] {
-    font-family: monospace;
+  font-family: monospace;
 }
 
-/* ========================================
-   FILTROS EXCLUSIVOS PARA TURNOS
-======================================== */
 .filtros select,
 .filtros input {
-    min-width: 140px;
+  min-width: 140px;
 }
+
+
+.fila-filtros {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 15px;
+}
+
+
+.fila-filtros select,
+.fila-filtros input[type="date"] {
+  height: 32px;
+  padding: 4px 6px;
+}
+
+.fila-filtros button {
+  height: 34px;
+  padding: 4px 10px;
+}
+
+
+

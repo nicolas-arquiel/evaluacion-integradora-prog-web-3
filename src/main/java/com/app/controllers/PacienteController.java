@@ -26,9 +26,7 @@ public class PacienteController {
     @Inject
     private Models models;
 
-    // =============================================
-    // LISTAR (INDEX)
-    // =============================================
+    // LISTAR
     @GET
     @View("pacientes/index.jsp")
     public void listar(
@@ -40,7 +38,6 @@ public class PacienteController {
         models.put("pacientes", repo.listar());
         models.put("obrasSociales", repoObras.listar());
         
-        // Pasar mensajes desde parámetros URL
         if (success != null && !success.isEmpty()) {
             models.put("success", success);
         }
@@ -55,9 +52,7 @@ public class PacienteController {
         }
     }
 
-    // =============================================
-    // GUARDAR (CREAR / EDITAR)
-    // =============================================
+    // GUARDAR
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String guardar(
@@ -100,14 +95,11 @@ public class PacienteController {
         return AlertUtils.redirectWithInfo("/pacientes", "Operación completada");
     }
 
-    // =============================================
     // ELIMINAR
-    // =============================================
     @GET
     @Path("/eliminar/{id}")
     public String eliminar(@PathParam("id") int id) {
         try {
-            // Obtener nombre del paciente antes de eliminar
             Paciente paciente = repo.obtenerPorId(id);
             repo.eliminar(id);
             
@@ -124,4 +116,21 @@ public class PacienteController {
                 "Error al eliminar el paciente: " + e.getMessage());
         }
     }
+
+
+    // ACTIVAR
+    @GET
+    @Path("/activar/{id}")
+    public String activar(@PathParam("id") int id) {
+        try {
+            repo.activar(id);
+            return AlertUtils.redirectWithSuccess("/pacientes", "Paciente activado correctamente");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AlertUtils.redirectWithError("/pacientes", 
+                "Error al activar: " + e.getMessage());
+        }
+    }
+
+
 }

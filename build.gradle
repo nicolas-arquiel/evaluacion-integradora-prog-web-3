@@ -11,25 +11,14 @@ repositories {
 }
 
 dependencies {
-    // Jakarta EE API (solo la API, Payara provee las implementaciones)
     providedCompile 'jakarta.platform:jakarta.jakartaee-api:10.0.0'
-
-    // Jakarta MVC API (API solamente)
     implementation 'jakarta.mvc:jakarta.mvc-api:2.1.0'
-
-    // Krazo MVC (implementación real)
     implementation 'org.eclipse.krazo:krazo-core:3.0.1'
     implementation 'org.eclipse.krazo:krazo-jersey:3.0.1'
-
-    // Jersey (Payara usa Jersey → necesario para que Krazo funcione)
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet:3.1.1'
     implementation 'org.glassfish.jersey.inject:jersey-hk2:3.1.1'
-
-    // JSP + JSTL
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.1'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
-
-    // PostgreSQL JDBC
     implementation 'org.postgresql:postgresql:42.7.3'
 }
 
@@ -41,8 +30,5 @@ tasks.withType(JavaCompile) {
 
 war {
     archiveFileName = 'turnos_medicos.war'
-    
-    // El plugin war ya copia automáticamente src/main/webapp
-    // Solo necesitamos configurar la estrategia de duplicados
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

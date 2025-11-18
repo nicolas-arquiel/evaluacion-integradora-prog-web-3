@@ -11,19 +11,20 @@ public class PacienteRepository {
 
     public List<Paciente> listar() {
         List<Paciente> pacientes = new ArrayList<>();
+
         String sql = """
-            SELECT p.*, os.nombre as obra_social_nombre
+            SELECT p.*, os.nombre AS obra_social_nombre
             FROM pacientes p
             INNER JOIN obras_sociales os ON p.obra_social_id = os.id
-            WHERE p.activo = TRUE
-            ORDER BY p.id
+            ORDER BY p.id DESC
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
+
                 Paciente p = new Paciente(
                     rs.getInt("id"),
                     rs.getString("nombre"),
@@ -35,6 +36,7 @@ public class PacienteRepository {
                 );
 
                 p.setObraSocialNombre(rs.getString("obra_social_nombre"));
+
                 pacientes.add(p);
             }
 
@@ -44,6 +46,8 @@ public class PacienteRepository {
 
         return pacientes;
     }
+
+
 
     public boolean existeDocumento(String documento) {
         String sql = "SELECT COUNT(*) FROM pacientes WHERE documento = ? AND activo = TRUE";
@@ -186,4 +190,20 @@ public class PacienteRepository {
             e.printStackTrace();
         }
     }
+
+    public void activar(int id) {
+        String sql = "UPDATE pacientes SET activo = TRUE WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

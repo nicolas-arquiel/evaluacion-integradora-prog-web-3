@@ -1,12 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<!-- Sistema de alertas automático -->
 <c:if test="${not empty success}">
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             mostrarExito('Operación exitosa', decodeURIComponent('<c:out value="${success}" />'));
-            // Limpiar URL después de mostrar la alerta
             limpiarParametrosURL();
         });
     </script>

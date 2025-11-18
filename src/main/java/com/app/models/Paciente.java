@@ -8,7 +8,7 @@ public class Paciente {
     private String numeroTelefono;
     private String documento;
     private int obraSocialId;
-    private String obraSocialNombre;  // Para mostrar en vistas
+    private String obraSocialNombre;
     private boolean activo;
 
     public Paciente() {}

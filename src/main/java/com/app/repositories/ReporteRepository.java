@@ -7,7 +7,6 @@ import java.util.*;
 
 public class ReporteRepository {
 
-    // Turnos por Médico
     public List<Map<String, Object>> turnosPorMedico() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -50,7 +49,6 @@ public class ReporteRepository {
         return resultado;
     }
 
-    // Turnos por Especialidad
     public List<Map<String, Object>> turnosPorEspecialidad() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -86,7 +84,6 @@ public class ReporteRepository {
         return resultado;
     }
 
-    // Turnos por Obra Social
     public List<Map<String, Object>> turnosPorObraSocial() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -102,7 +99,6 @@ public class ReporteRepository {
             FROM obras_sociales os
             LEFT JOIN pacientes p ON p.obra_social_id = os.id
             LEFT JOIN turnos t ON t.paciente_id = p.id
-            WHERE os.activo = true
             GROUP BY os.id, os.nombre
             ORDER BY cantidadTurnos DESC
         """;
@@ -128,7 +124,6 @@ public class ReporteRepository {
     }
 
 
-    // Turnos por Estado
     public List<Map<String, Object>> turnosPorEstado() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -162,7 +157,6 @@ public class ReporteRepository {
         return resultado;
     }
 
-    // Contar por Estado
     public int contarPorEstado(String estado) {
         String sql = """
             SELECT COUNT(*) 
@@ -188,7 +182,6 @@ public class ReporteRepository {
         return 0;
     }
 
-    // Turnos por Mes
     public List<Map<String, Object>> turnosPorMes() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -228,7 +221,6 @@ public class ReporteRepository {
         return resultado;
     }
 
-    // Turnos vencidos en estado programado
     public List<Map<String, Object>> turnosVencidos() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 

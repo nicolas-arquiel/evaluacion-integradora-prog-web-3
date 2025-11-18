@@ -1,0 +1,22 @@
+.error-container {
+  text-align: center;
+  margin-top: 80px;
+}
+
+.error-container h1 {
+  font-size: 70px;
+  color: #cc0000;
+  margin-bottom: 20px;
+}
+
+.error-container p {
+  font-size: 22px;
+  color: #333;
+  margin-bottom: 40px;
+}
+
+.error-container .btn-primary {
+  margin-top: 20px;
+  padding: 10px 18px;
+  font-size: 16px;
+}

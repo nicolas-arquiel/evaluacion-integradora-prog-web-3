@@ -5,28 +5,22 @@
 
         <head>
             <title>Reportes y Estadísticas - Salud Total</title>
-            <link rel="stylesheet" href="/css/styles.css">
+            <jsp:include page="/WEB-INF/includes/header.jsp" />
             <link rel="stylesheet" href="/css/reportes.css">
-
-            <!-- FONT AWESOME -->
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
             <script src="/js/reportes.js"></script>
-
         </head>
 
         <body>
 
-            <!-- SIDEBAR -->
             <jsp:include page="/WEB-INF/includes/sidebar.jsp" />
 
-            <!-- CONTENIDO -->
             <div class="content">
 
-                <h1><i class="fas fa-chart-bar"></i> Reportes y Estadísticas</h1>
-                <p style="color: #666; margin-bottom: 30px;">Seleccione un tipo de reporte para ver la información</p>
+                <h2><i class="fas fa-chart-bar"></i> Reportes</h2>
+                <p class="reporte-subtitulo">
+                    Seleccione un tipo de reporte para ver la información
+                </p>
 
-                <!-- CARDS DE REPORTES -->
                 <div class="report-cards">
 
                     <div class="report-card" onclick="mostrarReporte('turnos-medico')" id="card-turnos-medico">
@@ -71,7 +65,6 @@
                 </div>
 
 
-                <!-- ESTADO INICIAL -->
                 <div class="report-section active" id="report-inicial">
                     <div class="empty-state">
                         <div class="icon"><i class="fas fa-chart-bar"></i></div>
@@ -81,9 +74,6 @@
                 </div>
 
 
-                <!-- ===================================================== -->
-                <!-- REPORTE: TURNOS POR MÉDICO -->
-                <!-- ===================================================== -->
                 <div class="report-section" id="report-turnos-medico">
                     <h2><i class="fas fa-user-md"></i> Turnos por Médico</h2>
                     <table>
@@ -113,9 +103,6 @@
                 </div>
 
 
-                <!-- ===================================================== -->
-                <!-- REPORTE: TURNOS POR ESPECIALIDAD -->
-                <!-- ===================================================== -->
                 <div class="report-section" id="report-turnos-especialidad">
                     <h2><i class="fas fa-stethoscope"></i> Turnos por Especialidad</h2>
 
@@ -140,9 +127,6 @@
                 </div>
 
 
-                <!-- ===================================================== -->
-                <!-- REPORTE: TURNOS POR OBRA SOCIAL -->
-                <!-- ===================================================== -->
                 <div class="report-section" id="report-turnos-obra-social">
                     <h2><i class="fas fa-id-card"></i> Turnos por Obra Social</h2>
 
@@ -169,9 +153,6 @@
                 </div>
 
 
-                <!-- ===================================================== -->
-                <!-- REPORTE: ESTADOS DE TURNOS -->
-                <!-- ===================================================== -->
                 <div class="report-section" id="report-estados-turnos">
                     <h2><i class="fas fa-list-check"></i> Estados de Turnos</h2>
 
@@ -196,9 +177,6 @@
                 </div>
 
 
-                <!-- ===================================================== -->
-                <!-- REPORTE: TURNOS POR MES -->
-                <!-- ===================================================== -->
                 <div class="report-section" id="report-turnos-mes">
                     <h2><i class="fas fa-calendar-alt"></i> Turnos por Mes</h2>
 
@@ -229,9 +207,6 @@
                 </div>
 
 
-                <!-- ===================================================== -->
-                <!-- REPORTE: TURNOS VENCIDOS SIN ESTADO -->
-                <!-- ===================================================== -->
                 <div class="report-section" id="report-turnos-vencidos">
                     <h2><i class="fas fa-exclamation-triangle"></i> Turnos Vencidos sin Estado</h2>
 

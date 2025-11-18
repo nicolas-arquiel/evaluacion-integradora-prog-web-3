@@ -1,45 +1,51 @@
 .report-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 35px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 35px;
 }
 
 .report-card {
-    background: #fff;
-    border-radius: 10px;
-    padding: 25px;
-    cursor: pointer;
-    border: 2px solid #eee;
-    transition: 0.2s ease-in-out;
-    text-align: center;
+  background: #fff;
+  border-radius: 10px;
+  padding: 25px;
+  cursor: pointer;
+  border: 2px solid #eee;
+  transition: 0.2s ease-in-out;
+  text-align: center;
 }
 
 .report-card:hover {
-    border-color: #007bff;
-    transform: translateY(-3px);
+  border-color: #007bff;
+  transform: translateY(-3px);
 }
 
 .report-card.active {
-    border-color: #007bff;
-    background: #f0f7ff;
+  border-color: #007bff;
+  background: #f0f7ff;
 }
 
 .report-card .icon {
-    font-size: 38px;
-    margin-bottom: 10px;
+  font-size: 38px;
+  margin-bottom: 10px;
 }
 
 .report-section {
-    display: none;
+  display: none;
 }
 
 .report-section.active {
-    display: block;
+  display: block;
 }
 
 .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #777;
+  text-align: center;
+  padding: 40px;
+  color: #777;
+}
+
+.reporte-subtitulo {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 15px;
 }

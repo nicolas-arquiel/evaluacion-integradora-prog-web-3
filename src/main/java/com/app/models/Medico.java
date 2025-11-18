@@ -7,7 +7,7 @@ public class Medico {
     private int id;
     private String nombre;
     private int especialidadId;
-    private String especialidadDescripcion;  // Para mostrar en vistas
+    private String especialidadDescripcion;
     private String matricula;
     private boolean activo;
 

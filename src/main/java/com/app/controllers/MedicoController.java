@@ -30,9 +30,7 @@ public class MedicoController {
     @Inject
     private Models models;
 
-    // ============================================
-    // LISTAR (INDEX)
-    // ============================================
+    // LISTAR
     @GET
     @View("medicos/index.jsp")
     public void listar(
@@ -45,7 +43,6 @@ public class MedicoController {
         models.put("obrasSociales", repoObras.listar());
         models.put("especialidades", repoEspecialidades.listar());
         
-        // Pasar mensajes desde parámetros URL
         if (success != null && !success.isEmpty()) {
             models.put("success", success);
         }
@@ -60,9 +57,7 @@ public class MedicoController {
         }
     }
 
-    // ============================================
-    // GUARDAR (CREAR / ACTUALIZAR)
-    // ============================================
+    // GUARDAR
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String guardar(
@@ -74,32 +69,25 @@ public class MedicoController {
             @FormParam("obrasSocialesIds") List<Integer> obras
     ) {
 
-        // ============================================
-        // VALIDACIONES OBLIGATORIAS
-        // ============================================
+        // VALIDACIONES
         List<String> errores = new ArrayList<>();
 
-        // Validar nombre
         if (nombre == null || nombre.trim().isEmpty()) {
             errores.add("El nombre es obligatorio");
         }
 
-        // Validar especialidad
         if (especialidadId == null || especialidadId <= 0) {
             errores.add("Debe seleccionar una especialidad");
         }
 
-        // Validar matrícula
         if (matricula == null || matricula.trim().isEmpty()) {
             errores.add("La matrícula es obligatoria");
         }
 
-        // Validar obras sociales
         if (obras == null || obras.isEmpty()) {
             errores.add("Debe seleccionar al menos una obra social");
         }
 
-        // Si hay errores, mostrar mensaje de validación
         if (!errores.isEmpty()) {
             String mensajeError = "Faltan completar los siguientes datos: " + String.join(", ", errores);
             return AlertUtils.redirectWithError("/medicos", mensajeError);
@@ -107,7 +95,6 @@ public class MedicoController {
 
         try {
             if ("crear".equals(action)) {
-                // Validación adicional para crear: verificar que no exista la matrícula
                 if (repo.existeMatricula(matricula.trim())) {
                     return AlertUtils.redirectWithError("/medicos", 
                         "Ya existe un médico con la matrícula " + matricula.trim());
@@ -125,12 +112,10 @@ public class MedicoController {
                     "Médico " + nombre.trim() + " creado exitosamente con matrícula " + matricula.trim());
 
             } else if ("actualizar".equals(action)) {
-                // Validación adicional para actualizar: verificar que el ID exista
                 if (id == null || id <= 0) {
                     return AlertUtils.redirectWithError("/medicos", "ID de médico inválido");
                 }
 
-                // Verificar que no exista otra matrícula igual (excepto el mismo médico)
                 if (repo.existeMatriculaOtroMedico(matricula.trim(), id)) {
                     return AlertUtils.redirectWithError("/medicos", 
                         "Ya existe otro médico con la matrícula " + matricula.trim());
@@ -157,19 +142,15 @@ public class MedicoController {
         return AlertUtils.redirectWithInfo("/medicos", "Operación completada");
     }
 
-    // ============================================
     // ELIMINAR
-    // ============================================
     @GET
     @Path("/eliminar/{id}")
     public String eliminar(@PathParam("id") int id) {
         try {
-            // Validar que el ID sea válido
             if (id <= 0) {
                 return AlertUtils.redirectWithError("/medicos", "ID de médico inválido");
             }
 
-            // Obtener datos del médico antes de eliminar
             Medico medico = repo.obtenerPorId(id);
             
             if (medico == null) {
@@ -188,4 +169,35 @@ public class MedicoController {
                 "Error al eliminar el médico: " + e.getMessage());
         }
     }
+
+
+    @GET
+    @Path("/activar/{id}")
+    public String activar(@PathParam("id") int id) {
+        try {
+            Medico medico = repo.obtenerPorId(id);
+
+            if (medico == null) {
+                return AlertUtils.redirectWithWarning("/medicos",
+                    "El médico que intenta activar no existe");
+            }
+
+            repo.activar(id);
+
+            return AlertUtils.redirectWithSuccess("/medicos",
+                "Médico " + medico.getNombre() + " (Matrícula: " + medico.getMatricula() + ") activado correctamente");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AlertUtils.redirectWithError("/medicos",
+                "Error al activar el médico: " + e.getMessage());
+        }
+    }
+
+
+
+
+
+
+
 }

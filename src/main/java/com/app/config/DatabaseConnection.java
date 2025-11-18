@@ -20,11 +20,11 @@ public class DatabaseConnection {
             try {
                 Class.forName("org.postgresql.Driver");
             } catch (ClassNotFoundException e) {
-                throw new SQLException("No se encontró el driver JDBC de PostgreSQL", e);
+                throw new SQLException("============= No se encontró el driver JDBC de PostgreSQL =============", e);
             }
 
             connection = DriverManager.getConnection(url, USER, PASSWORD);
-            System.out.println("✅ Conexión exitosa a PostgreSQL en " + url);
+            System.out.println("============= Conexión exitosa a PostgreSQL en " + url + " =============");
         }
         return connection;
     }
@@ -33,7 +33,7 @@ public class DatabaseConnection {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                System.out.println("🔒 Conexión cerrada correctamente");
+                System.out.println("============= Conexión cerrada correctamente============= ");
             }
         } catch (SQLException e) {
             e.printStackTrace();

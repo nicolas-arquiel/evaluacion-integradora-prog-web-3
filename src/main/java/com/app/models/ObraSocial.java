@@ -3,14 +3,12 @@ package com.app.models;
 public class ObraSocial {
     private int id;
     private String nombre;
-    private boolean activo;
 
     public ObraSocial() {}
 
-    public ObraSocial(int id, String nombre, boolean activo) {
+    public ObraSocial(int id, String nombre) {
         this.id = id;
         this.nombre = nombre;
-        this.activo = activo;
     }
 
     public int getId() { return id; }
@@ -18,7 +16,4 @@ public class ObraSocial {
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-
-    public boolean isActivo() { return activo; }
-    public void setActivo(boolean activo) { this.activo = activo; }
 }
