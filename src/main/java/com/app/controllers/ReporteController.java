@@ -21,6 +21,9 @@ public class ReporteController {
     private final ReporteRepository repo = new ReporteRepository();
     private final MedicoRepository repoMedicos = new MedicoRepository();
     private final TurnoRepository repoTurnos = new TurnoRepository();
+    private static final int ESTADO_PROGRAMADO = 1;
+    private static final int ESTADO_CANCELADO  = 2;
+    private static final int ESTADO_COMPLETADO = 3;
 
     @Inject
     private Models models;
@@ -28,33 +31,27 @@ public class ReporteController {
     @GET
     @View("reportes/index.jsp")
     public void index() {
-        
-        // Turnos por medico
+
         models.put("reporteTurnosMedico", repo.turnosPorMedico());
         models.put("totalMedicos", repoMedicos.listar().size());
-        
+
         int totalTurnos = repoTurnos.listar().size();
         int totalMedicos = repoMedicos.listar().size();
         int promedio = totalMedicos > 0 ? totalTurnos / totalMedicos : 0;
         models.put("promedioTurnosMedico", promedio);
 
-        // Turnos por especialidad
         models.put("reporteTurnosEspecialidad", repo.turnosPorEspecialidad());
 
-        // Turnos por obra social
         models.put("reporteTurnosObraSocial", repo.turnosPorObraSocial());
 
-        // Estados de turnos
         models.put("reporteEstados", repo.turnosPorEstado());
-        models.put("estadosProgramados", repo.contarPorEstado("programado"));
-        models.put("estadosCompletados", repo.contarPorEstado("completado"));
-        models.put("estadosCancelados", repo.contarPorEstado("cancelado"));
+        models.put("estadosProgramados", repo.contarPorEstado(ESTADO_PROGRAMADO));
+        models.put("estadosCompletados", repo.contarPorEstado(ESTADO_COMPLETADO));
+        models.put("estadosCancelados", repo.contarPorEstado(ESTADO_CANCELADO));
         models.put("estadosTotal", totalTurnos);
 
-        // Turnos por mes
         models.put("reporteTurnosMes", repo.turnosPorMes());
 
-        // turnos vencidos en estado programado
         models.put("reporteTurnosVencidos", repo.turnosVencidos());
     }
 }

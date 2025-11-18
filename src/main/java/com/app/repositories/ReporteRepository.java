@@ -7,6 +7,10 @@ import java.util.*;
 
 public class ReporteRepository {
 
+    private static final int ESTADO_PROGRAMADO = 1;
+    private static final int ESTADO_CANCELADO  = 2;
+    private static final int ESTADO_COMPLETADO = 3;
+
     public List<Map<String, Object>> turnosPorMedico() {
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -14,13 +18,12 @@ public class ReporteRepository {
             SELECT 
                 m.nombre AS nombreMedico,
                 e.descripcion AS especialidad,
-                COUNT(CASE WHEN est.nombre = 'programado' THEN 1 END) as programados,
-                COUNT(CASE WHEN est.nombre = 'completado' THEN 1 END) as completados,
-                COUNT(CASE WHEN est.nombre = 'cancelado' THEN 1 END) as cancelados,
-                COUNT(*) as total
+                COUNT(CASE WHEN t.estado_id = 1 THEN 1 END) AS programados,
+                COUNT(CASE WHEN t.estado_id = 3 THEN 1 END) AS completados,
+                COUNT(CASE WHEN t.estado_id = 2 THEN 1 END) AS cancelados,
+                COUNT(*) AS total
             FROM medicos m
             LEFT JOIN turnos t ON t.medico_id = m.id
-            LEFT JOIN estados est ON t.estado_id = est.id
             LEFT JOIN especialidades e ON m.especialidad_id = e.id
             WHERE m.activo = true
             GROUP BY m.id, m.nombre, e.descripcion
@@ -42,9 +45,7 @@ public class ReporteRepository {
                 resultado.add(fila);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return resultado;
     }
@@ -55,8 +56,8 @@ public class ReporteRepository {
         String sql = """
             SELECT 
                 e.descripcion AS especialidad,
-                COUNT(t.id) as cantidad,
-                ROUND(COUNT(t.id) * 100.0 / (SELECT COUNT(*) FROM turnos), 2) as porcentaje
+                COUNT(t.id) AS cantidad,
+                ROUND(COUNT(t.id) * 100.0 / (SELECT COUNT(*) FROM turnos), 2) AS porcentaje
             FROM especialidades e
             LEFT JOIN medicos m ON m.especialidad_id = e.id
             LEFT JOIN turnos t ON t.medico_id = m.id
@@ -77,9 +78,7 @@ public class ReporteRepository {
                 resultado.add(fila);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return resultado;
     }
@@ -90,12 +89,9 @@ public class ReporteRepository {
         String sql = """
             SELECT 
                 os.nombre AS obraSocial,
-                COUNT(DISTINCT p.id) as cantidadPacientes,
-                COUNT(t.id) as cantidadTurnos,
-                ROUND(
-                    COUNT(t.id) * 1.0 / NULLIF(COUNT(DISTINCT p.id), 0),
-                    2
-                ) as promedio
+                COUNT(DISTINCT p.id) AS cantidadPacientes,
+                COUNT(t.id) AS cantidadTurnos,
+                ROUND(COUNT(t.id) * 1.0 / NULLIF(COUNT(DISTINCT p.id), 0), 2) AS promedio
             FROM obras_sociales os
             LEFT JOIN pacientes p ON p.obra_social_id = os.id
             LEFT JOIN turnos t ON t.paciente_id = p.id
@@ -104,8 +100,8 @@ public class ReporteRepository {
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Map<String, Object> fila = new HashMap<>();
@@ -116,13 +112,10 @@ public class ReporteRepository {
                 resultado.add(fila);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return resultado;
     }
-
 
     public List<Map<String, Object>> turnosPorEstado() {
         List<Map<String, Object>> resultado = new ArrayList<>();
@@ -130,8 +123,8 @@ public class ReporteRepository {
         String sql = """
             SELECT 
                 e.nombre AS estado,
-                COUNT(t.id) as cantidad,
-                ROUND(COUNT(t.id) * 100.0 / (SELECT COUNT(*) FROM turnos), 2) as porcentaje
+                COUNT(t.id) AS cantidad,
+                ROUND(COUNT(t.id) * 100.0 / (SELECT COUNT(*) FROM turnos), 2) AS porcentaje
             FROM estados e
             LEFT JOIN turnos t ON t.estado_id = e.id
             GROUP BY e.id, e.nombre
@@ -150,34 +143,23 @@ public class ReporteRepository {
                 resultado.add(fila);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return resultado;
     }
 
-    public int contarPorEstado(String estado) {
-        String sql = """
-            SELECT COUNT(*) 
-            FROM turnos t
-            JOIN estados e ON t.estado_id = e.id
-            WHERE e.nombre = ?
-        """;
+    public int contarPorEstado(int estadoId) {
+        String sql = "SELECT COUNT(*) FROM turnos WHERE estado_id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, estado);
+            ps.setInt(1, estadoId);
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
+            if (rs.next()) return rs.getInt(1);
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return 0;
     }
@@ -187,14 +169,13 @@ public class ReporteRepository {
 
         String sql = """
             SELECT 
-                TO_CHAR(t.fecha, 'Month') as mes,
-                EXTRACT(YEAR FROM t.fecha) as anio,
-                COUNT(CASE WHEN est.nombre = 'programado' THEN 1 END) as programados,
-                COUNT(CASE WHEN est.nombre = 'completado' THEN 1 END) as completados,
-                COUNT(CASE WHEN est.nombre = 'cancelado' THEN 1 END) as cancelados,
-                COUNT(*) as total
+                TO_CHAR(t.fecha, 'Month') AS mes,
+                EXTRACT(YEAR FROM t.fecha) AS anio,
+                COUNT(CASE WHEN t.estado_id = 1 THEN 1 END) AS programados,
+                COUNT(CASE WHEN t.estado_id = 3 THEN 1 END) AS completados,
+                COUNT(CASE WHEN t.estado_id = 2 THEN 1 END) AS cancelados,
+                COUNT(*) AS total
             FROM turnos t
-            JOIN estados est ON t.estado_id = est.id
             GROUP BY TO_CHAR(t.fecha, 'Month'), EXTRACT(YEAR FROM t.fecha), EXTRACT(MONTH FROM t.fecha)
             ORDER BY anio DESC, EXTRACT(MONTH FROM t.fecha) DESC
         """;
@@ -214,9 +195,7 @@ public class ReporteRepository {
                 resultado.add(fila);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return resultado;
     }
@@ -237,7 +216,7 @@ public class ReporteRepository {
             JOIN pacientes p ON t.paciente_id = p.id
             JOIN medicos m ON t.medico_id = m.id
             JOIN especialidades e ON m.especialidad_id = e.id
-            WHERE est.nombre = 'programado'
+            WHERE t.estado_id = 1
             AND (
                 t.fecha < CURRENT_DATE
                 OR (t.fecha = CURRENT_DATE AND t.hora < CURRENT_TIME)
@@ -246,8 +225,8 @@ public class ReporteRepository {
         """;
 
         try (Connection conn = DatabaseConnection.getConnection();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Map<String, Object> fila = new HashMap<>();
@@ -260,12 +239,9 @@ public class ReporteRepository {
                 resultado.add(fila);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } catch (SQLException e) { e.printStackTrace(); }
 
         return resultado;
     }
-
 
 }
